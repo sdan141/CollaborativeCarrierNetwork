@@ -1,0 +1,9 @@
+stages:
+  - build
+
+build:
+  stage: build
+  image: python:3.10  
+  script:
+    - pip install -r requirements.txt  
+ 
