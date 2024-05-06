@@ -6,15 +6,21 @@ function ensures an odd number of locations, which includes one depot and an
 even number of delivery locations.
 
 Functions:
-    generate_odd_random(): Generate a random odd number between MIN_REQUESTS
-        and MAX_REQUESTS.
-    create_random_locations(): Create a list of random locations (x, y) within
-        a -100 to 100 grid.
-    assign_deliveries(locations): Assign delivery pairs to a list of locations.
+    generate_odd_random(): 
+        Generate a random odd number between MIN_REQUESTS and MAX_REQUESTS.
+
+    create_random_locations(): 
+        Create a list of random locations (x, y) within a -100 to 100 grid.
+
+    assign_deliveries(locations): 
+        Assign delivery pairs to a list of locations.
 
 Constants:
-    MIN_LOCATIONS (int): The minimum number of requests for random location generation.
-    MAX_LOCATIONS (int): The maximum number of requests for random location generation.
+    MIN_LOCATIONS (int): 
+        The minimum number of requests for random location generation.
+
+    MAX_LOCATIONS (int): 
+        The maximum number of requests for random location generation.
 """
 import random
 
@@ -55,7 +61,7 @@ def assign_deliveries(locations):
         list of lists: A list of pairs [x, y] representing assigned delivery locations.
     """
     pairs = []
-    indices = list(range(1, len(locations))) # Exclude the depot.
+    indices = list(range(1, len(locations))) # Exclude the depot
     while len(indices) >= 2:  
         pair = random.sample(indices, 2)  
         pairs.append(pair)
