@@ -13,17 +13,17 @@ class Auctioneer:
     def start(self):
         self.socket.bind((self.host, self.port)) # bind socket 
         self.socket.listen() # begin listening for incoming connections
-        print(f"Auctioneer agent listening on {self.host}:{self.port}")
+        print(f"\nAuctioneer agent listening on {self.host}:{self.port}\n")
         
         while True:
             connection, address = self.socket.accept()
-            print(f'Accepted connection from {address}')
+            print(f'\nAccepted connection from: {address}\n')
             carrier_handler = threading.Thread(target=self.handle_carrier, args=(connection,))
             # for each new carrier, a new thread is spawned to handle communication.
             carrier_handler.start()    
 
     def handle_carrier(self, connection_socket):
-        print(f"New connection from {connection_socket.getpeername()}")
+        print(f"\nNew connection from {connection_socket.getpeername()}\n")
 
         while True:
             try:
@@ -33,7 +33,7 @@ class Auctioneer:
                 ### process incoming data here
                 message = data.decode("utf-8") # message is now string
                 message = json.loads(message) # message is dictionary
-                print(f"Received data from {connection_socket.getpeername()}: {message}")
+                print(f"\nReceived data from {connection_socket.getpeername()}: \n{message}\n")
        
                 if message["action"] == "REGISTER" : 
                     # carrier whants to register for auctions -> record and acknoledge
@@ -48,7 +48,7 @@ class Auctioneer:
                     connection_socket.sendall(bytes(response,"utf-8"))
 
                 elif message["action"] == "TR" :
-                    print(f"Received transport request from {message['name']}: {message}")
+                    print(f"\nReceived transport request from Agent {message['name']}: \n{message}\n")
                     self.start_auction(connection_socket, message)
                     # self.start_auction() or somthing like that
                     #connection_socket.send(bytes(f"Hello {message["name"]} Agent! Your request has bin received","utf-8"))
@@ -58,10 +58,10 @@ class Auctioneer:
                 ### connection_socket.sendall(response.encode())
 
             except Exception as e:
-                print(f"Error occure during handling connection with carrier {connection_socket.getpeername()}. Error : {e}")
+                print(f"\nError occure during handling connection with carrier {connection_socket.getpeername()}. \nError : {e}\n")
                 break
 
-        print(f"Connection from carrier {connection_socket.getpeername()} closed")
+        print(f"\nConnection from carrier {connection_socket.getpeername()} closed\n")
         connection_socket.close()
 
     def send_message(self, connection, message):
@@ -72,14 +72,15 @@ class Auctioneer:
         message = {"action": "REQUEST_TR"}
         message = json.dumps(message)
         self.send_message(connection, message)
-        print(f"Sent request to {connection.getpeername()} for transport request for auction")
+        print(f"\nSent request to {connection.getpeername()} for transport request for auction\n")
 
     def start_auction(self, connection, message):
-        print("Starting auction for transport request:", message)
+        print(f"\nStarting auction for transport request:\n{message}\n")
         carrier_name = message["name"]
 
         del message["action"]
         del message["name"]
+        message["min_price"] = message.pop("profit")
         auction_message = {
             "action": "AUCTION",
             **message  
