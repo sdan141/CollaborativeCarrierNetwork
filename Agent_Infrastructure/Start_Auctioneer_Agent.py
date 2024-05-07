@@ -2,7 +2,7 @@ from auctioneer import *
 import time
 
 if __name__ == "__main__":
-    server = Auctioneer(host=socket.gethostname(), port=40000)
+    server = Auctioneer(host=socket.gethostname(), port=12345)
 
     server_thread = threading.Thread(target=server.start)
     server_thread.start()
