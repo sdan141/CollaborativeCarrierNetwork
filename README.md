@@ -15,7 +15,7 @@ The objective of this project is to implement a system that facilitates the reas
 
 3. Install dependencies
 
-    pip install -r requirements.txt
+        pip install -r requirements.txt
         
 ## Usage 
 
