@@ -5,7 +5,7 @@ import sys
 
 if __name__ == "__main__":
     carrier = Carrier(sys.argv[1], socket.gethostname(), sys.argv[2])
-    carrier.connect(socket.gethostname(), 40000)
+    carrier.connect(socket.gethostname(), 12345)
 
     data = {
         "action": "REGISTER",
