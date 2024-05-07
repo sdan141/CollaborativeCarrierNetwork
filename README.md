@@ -34,12 +34,12 @@ The objective of this project is to implement a system that facilitates the reas
 * Use as Carrier
     
         cd Agent_Infrastructure
-        python3 Start_Carrier_Client.py
+        python3 Start_Carrier_Agent.py
 
 * Use as Auctioneer
 
         cd Agent_Infrastructure
-        python3 Start_Auctioneer_Server.py 
+        python3 Start_Auctioneer_Agent.py
 
 ## Authors
 
