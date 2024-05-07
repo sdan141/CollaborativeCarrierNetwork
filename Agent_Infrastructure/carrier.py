@@ -1,6 +1,7 @@
 import socket
 import json
 import pandas as pd
+from tabulate import tabulate
 
 class Carrier:
     def __init__(self, name, host=socket.gethostname(), port=2000):
@@ -11,7 +12,7 @@ class Carrier:
     
     def connect(self, server_host, server_port):
         self.socket.connect((server_host, server_port))
-        print(f"Connected to Auctioneer agent on {server_host}:{server_port}")
+        print(f"\nConnected to Auctioneer agent on {server_host}:{server_port}\n")
  
     def send_message(self, message):
         self.socket.sendall(bytes(message,encoding="utf-8"))
@@ -32,26 +33,28 @@ class Carrier:
                     self.handle_message(message)
                     
             except Exception as e:
-                print(f"Error occurred during message reception: {e}")    
+                print(f"\nError occurred during message reception: {e}\n")    
 
     def handle_message(self, message):
         if message["action"] == "ACK": 
-            print(f"Received message: {message['message']}")
+            print(f"\nReceived message: \n{message['message']}\n")
 
         elif message["action"] == "REQUEST_TR":
-            print("Received request for transport point")
+            print("\nReceived request for transport point\n")
             response = self.send_transport_point()
             self.send_message(json.dumps(response))
 
         elif message["action"] == "AUCTION":
-            print(f"Received auction message for transport request: {message}")
+            print(f"\nReceived auction message for transport request: \n{message}\n")
             self.handle_auction(message)
 
     def send_transport_point(self):
         deliveries_df = pd.read_csv("example_TR.csv")
-        print(f"all deliveries: {deliveries_df}")
+        print(f"\nAll deliveries: \n")
+        print(tabulate(deliveries_df, headers='keys', tablefmt='psql'))
         below_threshold = deliveries_df[(deliveries_df.profit).astype(float)<100]
-        print(f"deliveries below threshhold: {below_threshold}")
+        print(f"\n\ndeliveries below threshhold: \n")
+        print(tabulate(below_threshold, headers='keys', tablefmt='psql'))
         if len(below_threshold) > 0:
             delivery_point = below_threshold.iloc[0].to_dict()
             data = {
@@ -65,7 +68,7 @@ class Carrier:
                 "action" : "NO_TR", 
                 "name"   : self.name
             }
-        print(f"Transport request to send: {data}")
+        print(f"\n\nTransport request to send: \n{data}\n")
         return data 
     
     def handle_auction(self, auction_message):
@@ -76,7 +79,7 @@ class Carrier:
     def evaluate_transport_request(self, transport_request):
         with open('transport_request.json', 'w') as f:
             json.dump(transport_request, f)
-        bid = None
+        bid = input("how much are you ready to pay for this TR?\t")
         ### evaluate the transport request in the application
         # calculate marginal profit
         # decide bid value
@@ -88,9 +91,11 @@ class Carrier:
             "name": self.name,
             "bid_price": bid_price
         }
-        self.send_message(message)
+        self.send_message(json.dumps(message))
 
     def disconnect(self):
         self.socket.close()
         print("Disconnected from Auctioneer agent")
 
+### For better organization: Create seperate file with all message types 
+### and a function that organizes them
