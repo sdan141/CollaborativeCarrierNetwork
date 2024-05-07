@@ -7,21 +7,21 @@ The objective of this project is to implement a system that facilitates the reas
 
 ## Installation
 
-    1. Clone the repository
+1. Clone the repository
 
-    2. Download Python
+2. Download Python
 
-        [Python Download](https://www.python.org/downloads)
+    [Python Download](https://www.python.org/downloads)
 
-    3. Install dependencies
+3. Install dependencies
 
-        pip install -r requirements.txt
+    pip install -r requirements.txt
         
 ## Usage 
 
 * Simulate agent behavior
 
-    > Simulate agents (Default: 3 carrier agents)
+    > Simulate (Default: 3 carrier agents)
         
         cd Agent_Simulation
         python3 RunSimulation.py
@@ -33,15 +33,16 @@ The objective of this project is to implement a system that facilitates the reas
 
 * Use as Carrier
     
-    cd Agent_Infrastructure
-    python3 Start_Carrier_Client.py
+        cd Agent_Infrastructure
+        python3 Start_Carrier_Client.py
 
 * Use as Auctioneer
 
-    cd Agent_Infrastructure
-    python3 Start_Auctioneer_Server.py 
+        cd Agent_Infrastructure
+        python3 Start_Auctioneer_Server.py 
 
 ## Authors
-Max Kretschmann
-Shachar Dan
-Lorenz Leddig
+
+- Max Kretschmann
+- Shachar Dan
+- Lorenz Leddig
