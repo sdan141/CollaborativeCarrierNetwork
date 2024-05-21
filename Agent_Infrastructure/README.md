@@ -6,6 +6,8 @@
 
 ## Runnig the example shell script
 
+The shell script will open a terminal for the auctioneer agent and three carrier agents. As a check, it will open a fourth terminal for an already registered carrier. This example demonstrates the workflow of one auction round and illustrates the communication between the agents.
+
 1. Make sure you have gnome-terminal installed
 
         sudo apt-get install gnome-terminal
