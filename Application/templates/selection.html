@@ -1,0 +1,17 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<section id="selectionBackground">
+    
+    <div id="selectionContent">
+        <div style="font-size: 6em; width: 100%; display: block;">What is your company?</div>
+        <div style="display: flex; width: 100%; margin-top: 50px; justify-content: left; gap: 50px;">
+            <a class="buttonStyle" href="{{ url_for('carrier') }}">Carrier</a> 
+            <a class="buttonStyle" href="{{ url_for('auctioneer') }}">Auctioneer</a> 
+        </div>
+        
+    </div>
+</section>
+
+{% endblock %}

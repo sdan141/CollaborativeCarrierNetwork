@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Python Collaborative Carrier Network</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+        <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+        <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    </head>
+    <body>
+        <nav class="navbar">
+            <a class="navContent" id="logo" href="{{ url_for('selection') }}">Python Collaborative Carrier Network</a>
+            <a class="navContent">Other</a>
+            <a class="navContent" href="https://collaborating.tuhh.de/e16/courses/software-development/ss24/group09" target="_blank">Gitlab</a>
+            <a class="navContent">Documentation</a> 
+        </nav>
+
+        {% block content %}{% endblock %}
+    </body>
+</html>

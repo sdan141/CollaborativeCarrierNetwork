@@ -41,6 +41,11 @@ The objective of this project is to implement a system that facilitates the reas
         cd Agent_Infrastructure
         python3 Start_Auctioneer_Agent.py
 
+* Start application
+
+        cd Application
+        python3 app.py
+
 ## Authors
 
 - Max Kretschmann
