@@ -77,6 +77,7 @@ class Carrier:
         Returns:
             tuple: Action type and payload for the request
         """
+        self.socketio.emit(self.carrier_id, {'message': "Registering for auction..."})
         return "register", {}
 
     @json_request

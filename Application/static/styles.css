@@ -242,6 +242,7 @@ body {
 .guiBottomText {
     padding: 10px;
     font-size: 2em;
+    text-align: center;
 }
 
 #actionDisplay {

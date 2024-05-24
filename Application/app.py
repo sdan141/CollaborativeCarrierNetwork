@@ -98,7 +98,6 @@ def process_data(file):
     print(f"Depot location: {depot}")
     locations = [depot]
     
-
     row_count = len(file)
 
     for row in range(1, row_count):
@@ -154,7 +153,7 @@ def init_carrier():
     locations = request.json.get('locations')
     deliveries = request.json.get('deliveries')
     revenueList = request.json.get('revenueList')
-    start_carrier(company_name, locations, deliveries, revenueList, socketio)
+    start_carrier(company_name, locations, revenueList, socketio)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
