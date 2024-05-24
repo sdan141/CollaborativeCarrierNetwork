@@ -15,12 +15,12 @@ def read_transport_requests(file_path, carrier): # path?
     carrier.socketio.emit(carrier.carrier_Id, {'message': tabulate(deliveries_df, headers='keys', tablefmt='psql')})
     return deliveries_df 
 
-def get_requests_below_thresh_new(locations, revenu_list, thresh=80):
+def get_requests_below_thresh_new(locations, revenue_list, thresh=80):
     """returns a list of """
     requests_list = []
     multiplier = 0
-    for i in range(0, len(revenu_list)):
-        if(revenu_list[i] < thresh):
+    for i in range(0, len(revenue_list)):
+        if(revenue_list[i] < thresh):
             loc_pickup = {
                 "pos_x": locations[i + (1 + multiplier)][0], 
                 "pos_y": locations[i + (1 + multiplier)][1]
@@ -29,7 +29,7 @@ def get_requests_below_thresh_new(locations, revenu_list, thresh=80):
                 "pos_x": locations[i + (2 + multiplier)][0], 
                 "pos_y": locations[i + (2 + multiplier)][1]
                 }
-            profit = revenu_list[i]
+            profit = revenue_list[i]
             requests_list.append((loc_pickup, loc_dropoff, profit))
         multiplier = multiplier + 1
 

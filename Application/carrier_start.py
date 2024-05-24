@@ -2,7 +2,7 @@ from carrier_class import *
 import sys
 import utilities as utils
 
-def start_carrier(carrier_name, locations, revenu_list, socketio):
+def start_carrier(carrier_name, locations, revenue_list, socketio):
     carrier = Carrier(carrier_name, socketio) # Add more data?
     auct_response = carrier.register()
     print("\n Auctioneer response to register:")
@@ -10,10 +10,10 @@ def start_carrier(carrier_name, locations, revenu_list, socketio):
     
     if auct_response['payload']['status'] == 'OK':
         carrier.socketio.emit(carrier.carrier_id, {'message': "Registered successfully!"})
-        select_transport_requests(carrier, locations, revenu_list)
+        select_transport_requests(carrier, locations, revenue_list)
 
 
-def select_transport_requests(carrier, locations, revenu_list):
+def select_transport_requests(carrier, locations, revenue_list):
         """ Decide which offers to send (i.e. calculate offers below threshold)
         
             # Example offer
@@ -28,7 +28,7 @@ def select_transport_requests(carrier, locations, revenu_list):
             deliveries_df = utils.read_transport_requests(file_path, carrier)
             requests_below_thresh_list = utils.get_requests_below_thresh(deliveries_df, carrier)
         else:
-            requests_below_thresh_list = utils.get_requests_below_thresh_new(locations, revenu_list)
+            requests_below_thresh_list = utils.get_requests_below_thresh_new(locations, revenue_list)
         
         for i in range(0, len(requests_below_thresh_list)):
             carrier.socketio.emit(carrier.carrier_id, {'message': f"Selected: {requests_below_thresh_list[i]}"})
