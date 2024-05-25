@@ -180,7 +180,8 @@ class Auctioneer:
     def stop_server(self):
         self._stop_event.set()
         if self.server_socket:
-            self.server_socket.close()         
+            self.server_socket.close()     
+        exit()    
 
     def handle_carrier(self, carrier_socket):
         """
