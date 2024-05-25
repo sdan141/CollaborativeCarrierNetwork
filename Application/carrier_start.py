@@ -26,9 +26,9 @@ def select_transport_requests(carrier, locations, revenue_list):
         if(carrier.carrier_id == 'Lorenz' or carrier.carrier_id == 'Shachar' or carrier.carrier_id == 'Max'):
             file_path = f"example_TR_{carrier.carrier_id}.csv"
             deliveries_df = utils.read_transport_requests(file_path, carrier)
-            requests_below_thresh_list = utils.get_requests_below_thresh(deliveries_df, carrier)
+            requests_below_thresh_list = utils.get_requests_below_thresh_old(deliveries_df, carrier)
         else:
-            requests_below_thresh_list = utils.get_requests_below_thresh_new(locations, revenue_list)
+            requests_below_thresh_list = utils.get_requests_below_thresh(locations, revenue_list)
         
         for i in range(0, len(requests_below_thresh_list)):
             carrier.socketio.emit(carrier.carrier_id, {'message': f"Selected: {requests_below_thresh_list[i]}"})
@@ -111,6 +111,5 @@ def request_offers(carrier):
 def calculate_bids(carrier, offers):
     carrier.socketio.emit(carrier.carrier_id, {'message': "Calculating bids..."})
     ## Calculate bids for each offer and send bid for the most profitable offer
-
-
+   
             

@@ -25,7 +25,6 @@ def allowed_file(filename):
 def process_excel(file):
     locations = []
     deliveries = []
-    revenue_list = []
 
     # Add depot
     depot = []
@@ -40,8 +39,6 @@ def process_excel(file):
         pickup_y = file.iloc[row, 2]
         dropoff_x = file.iloc[row, 3]
         dropoff_y = file.iloc[row, 4]
-        revenue = file.iloc[row, 5]
-        revenue_list.append(revenue)
         locations.append((pickup_x, pickup_y))
         locations.append((dropoff_x, dropoff_y))
 
@@ -55,7 +52,6 @@ def process_excel(file):
     data = {
         'locations': locations,
         'deliveries': deliveries,
-        'revenue_list': revenue_list
     }
 
     return data

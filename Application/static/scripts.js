@@ -1,5 +1,5 @@
 var deliveriesAdded = false;
-var locations, deliveries, revenueList;
+var locations, profit_list;
 
 function uploadDeliveries() {
     const fileInput = document.getElementById('file');
@@ -21,7 +21,7 @@ function uploadDeliveries() {
     .then(data => {
         locations = data.locations;
         deliveries = data.deliveries;
-        revenueList = data.revenueList;
+        profitList = data.profitList;
         document.getElementById("frameGUI").src = 'data:image/png;base64,' + data.plot;
         document.getElementById("revenue").textContent = data.revenueTotal;
         document.getElementById("cost").textContent = data.cost;
@@ -42,7 +42,7 @@ function generateDeliveries() {
         .then(data => {
             locations = data.locations;
             deliveries = data.deliveries;
-            revenueList = data.revenueList;
+            profitList = data.profitList;
             document.getElementById("frameGUI").src = 'data:image/png;base64,' + data.plot;
             document.getElementById("revenue").textContent = data.revenueTotal;
             document.getElementById("cost").textContent = data.cost;
@@ -192,7 +192,7 @@ function initCarrier(companyName) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ companyName: companyName, locations: locations, deliveries: deliveries, revenueList: revenueList })
+            body: JSON.stringify({ companyName: companyName, locations: locations, profitList: profitList })
         })
     });
 }

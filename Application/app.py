@@ -3,13 +3,14 @@ from flask_socketio import SocketIO
 import io
 import base64
 
-from generate_requests import create_random_locations, assign_deliveries, assign_revenues
+from generate_requests import create_random_locations, assign_deliveries
 from draw_graph import show_tour
 from auctioneer_class import *
 from carrier_class import *
 from carrier_start import start_carrier
 from calculate_tour import get_optimal_tour, create_tour_data
 from handle_files import handle_file
+from cost_model import get_cost_list, get_revenue_list, get_profit_list
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -38,17 +39,21 @@ def auctioneer():
 def generate_deliveries():
     locations = create_random_locations()
     deliveries = assign_deliveries(locations)
-    revenue_list = assign_revenues(deliveries)
-    response = create_response(locations, deliveries, revenue_list)
+    response = create_response(locations, deliveries)
     return response
 
 @app.route('/upload_deliveries', methods=['POST'])
 def upload_deliveries():
     data = handle_file(request.files)
-    response = create_response(data['locations'], data['deliveries'], data['revenue_list'])
+    response = create_response(data['locations'], data['deliveries'])
     return response
 
-def create_response(locations, deliveries, revenue_list):
+BASE_PRICE = 20
+LOADING_RATE = 10
+KILOMETER_PRICE = 2
+KILOMETER_COST = 1
+
+def create_response(locations, deliveries):
     data = create_tour_data(locations, deliveries)
     tour_calculation = get_optimal_tour(data)
     
@@ -59,21 +64,30 @@ def create_response(locations, deliveries, revenue_list):
     output.seek(0)
     plot_base64 = base64.b64encode(output.getvalue()).decode('utf-8')
 
-    # Cost calculations
-    revenue_total = round(sum(revenue_list), 2)
-    distance = tour_calculation['distance']
-    cost = round(distance * 0.05, 2)
-    profit = round(revenue_total - cost, 2)
+    # Money calculations
+    distance_total = tour_calculation['distance']
+    individual_revenues = get_revenue_list(locations, deliveries, BASE_PRICE, KILOMETER_PRICE) 
+    individual_real_costs = get_cost_list(locations, deliveries, distance_total, LOADING_RATE, KILOMETER_COST)
+    individual_profits = get_profit_list(individual_revenues, individual_real_costs)
+    revenue_total = round(sum(individual_revenues), 2)
+    cost_total = round(len(deliveries) * LOADING_RATE + (distance_total / 1000) * KILOMETER_COST, 2)
+    profit_total = round(revenue_total - cost_total, 2)
+
+    print(f"Revenues: {individual_revenues}")
+    print(f"Costs: {individual_real_costs}")
+    print(f"Profits: {individual_profits}")
 
     response = {
         'plot': plot_base64,
         'locations': locations,
         'deliveries': deliveries,
-        'revenueList': revenue_list,
+        'revenueList': individual_revenues,
+        'costList': individual_real_costs,
+        'profitList': individual_profits,
         'revenueTotal': revenue_total,
-        'cost': cost,
-        'profit': profit,
-        'distance': distance,
+        'cost': cost_total,
+        'profit': profit_total,
+        'distance': distance_total,
     }
 
     return jsonify(response)
@@ -87,9 +101,8 @@ def init_auctioneer():
 def init_carrier():
     company_name = request.json.get('companyName')
     locations = request.json.get('locations')
-    deliveries = request.json.get('deliveries')
-    revenueList = request.json.get('revenueList')
-    start_carrier(company_name, locations, revenueList, socketio)
+    profit_list = request.json.get('profitList')
+    start_carrier(company_name, locations, profit_list, socketio)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

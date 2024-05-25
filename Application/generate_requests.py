@@ -26,8 +26,6 @@ import random
 
 MIN_LOCATIONS = 6
 MAX_LOCATIONS = 12
-MIN_REVENUE = 50
-MAX_REVENUE = 100 
 
 def generate_odd_random():
     """Return a random odd number between MIN_REQUESTS and MAX_REQUESTS."""
@@ -60,28 +58,14 @@ def assign_deliveries(locations):
     Returns:
         list of lists: A list of pairs [x, y] representing assigned delivery locations.
     """
-    pairs = []
-    indices = list(range(1, len(locations))) # Exclude the depot
-    while len(indices) >= 2:  
-        pair = random.sample(indices, 2)  
-        pairs.append(pair)
-        indices.remove(pair[0]) 
-        indices.remove(pair[1])
-    print(pairs)
-    return pairs
+    deliveries = []
+    multiplier = 0
+    delivery_amount = int((len(locations) - 1) / 2)
+    
+    for i in range(0, delivery_amount):
+        delivery_pair = [i + 1 + multiplier, i + 2 + multiplier]
+        deliveries.append(delivery_pair)
+        multiplier = multiplier + 1
 
-def assign_revenues(deliveries):
-    """Assign revenues to a list of deliveries.
-
-    Args:
-        deliveries (list of lists): A list of deliveries [x, y].
-
-    Returns:
-        list of int: A list of revenue values assigned to delivery requests.
-    """
-    revenues = []
-    for _ in range(len(deliveries)):
-        revenue = round(random.uniform(MIN_REVENUE, MAX_REVENUE), 2)
-        revenues.append(revenue) 
-    print(revenues)
-    return revenues
+    print(deliveries)
+    return deliveries

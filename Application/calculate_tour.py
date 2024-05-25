@@ -134,7 +134,6 @@ def get_optimal_tour(data):
         )
         total_distance += route_distance
     optimalTour.append(str(manager.IndexToNode(index)))
-    print(total_distance)
 
     result = {
         'optimalTour': optimalTour,
