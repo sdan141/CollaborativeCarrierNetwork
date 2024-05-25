@@ -1,0 +1,36 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<section id="mainSection">
+
+    <div id="contentContainer">
+    
+        <div id="chatContainer">
+            
+            <div class="companyName">Auctioneer</div> 
+
+            <div id="auctioneerChat">
+                <div class="chat-log" id="chatLog">
+                    <!-- Messages will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+
+
+        <div id="guiContainer">
+            <div id="gui">
+                <div id="guiTitle">Starting Tour</div>
+                <img alt="Matplotlib Plot" id="frameGUI">
+                <div class="tBlackBG" id="darkBackground"></div> 
+                <div class="buttonStyle" id="deliveryButton" onclick="">Show something</div>
+            </div>
+        </div>
+    
+    </div>
+
+    <div id="guiButton" onclick="">?</div>
+
+</section>
+
+{% endblock %}

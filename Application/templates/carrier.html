@@ -1,0 +1,72 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<div id="actionDisplay">
+    <div id="closeButton" onclick="closeActionDisplay()">X</div>
+    <div id="actionText">
+        <span style="font-size: 2em;">Add Deliveries</span></br>
+        You can upload your own deliveries or generate random ones.
+    </div>
+    <input type="file" id="file" accept=".xlsx, .xls" style="display: block; height: 50px; font-size: 1.5em; margin-top: 20px;">
+    <div class="buttonStyle" id="uploadButton" onclick="uploadDeliveries()">Upload</div>
+    <div class="buttonStyle" id="generateButton" onclick="generateDeliveries()">Generate</div>
+</div>
+<div class="tBlackBG" id="actionDarkBG" onclick="closeActionDisplay()"></div> 
+
+<section id="mainSection">
+
+    <div id="contentContainer">
+    
+        <div id="chatContainer">
+            
+            <div class="companyName" id="companyTitle">Company Name</div> 
+            
+            <div id="settings">
+                <input class="companyName" placeholder="Company Name" id="companyName">
+                <p class="valueText" id="maxVal">
+                    Max Value: 
+                    <input type="number" id="numberInput" min="0" max="100" value="50" oninput="updateSlider(this.value)" class="valueInput">
+                </p>
+                
+                <p class="valueText" id="minVal">
+                    Min Value: 
+                    <input type="number" id="numberInput" min="0" max="100" value="50" oninput="updateSlider(this.value)" class="valueInput">
+                </p>
+            </div>
+
+            <div id="chat">
+                <div class="chat-log" id="chatLog">
+                    <!-- Messages will be dynamically added here -->
+                </div>
+            </div>
+
+            <div id="errorMessage"></div>
+
+            <button class="buttonStyle" onclick="registerAuction()" id="registerButton">Register for auction</button>
+        </div>
+
+
+        <div id="guiContainer">
+            <div id="gui">
+                <div id="guiTitle">Starting Tour</div>
+                <img alt="Matplotlib Plot" id="frameGUI">
+                <div class="tBlackBG" id="darkBackground"></div> 
+                <div class="buttonStyle" id="deliveryButton" onclick="showActionDisplay()">Add deliveries</div>
+            </div>
+            <div id="guiBottomText">
+                <div class="guiBottomText">Revenue <span id="revenue">0</span>€</div>
+                <div class="guiBottomText">Cost <span id="cost">0</span>€</div>
+                <div class="guiBottomText">Profit <span id="profit">0</span>€</div>
+                <div class="guiBottomText">Distance <span id="distance">0</span>m</div>  
+            </div>
+        </div>
+    
+    </div>
+
+    <div id="guiButton" onclick="">?</div>
+    <!-- <div id="guiButton" onclick="sendMessage('Test')">Settings</div> -->
+
+</section>
+
+{% endblock %}

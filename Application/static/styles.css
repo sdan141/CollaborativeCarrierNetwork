@@ -1,0 +1,329 @@
+body {
+    font-family: Helvetica;
+    padding: 0;
+    margin: 0;
+    background-color: rgb(241, 238, 238);
+}
+
+.buttonStyle {
+    width: auto;
+    height: 75px;
+    font-size: 2em;
+    background-color: orange;
+    color: white;
+    cursor: pointer;
+    border: 0px;
+    padding-left: 25px;
+    padding-right: 25px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none; 
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.buttonStyle:hover {
+    background-color: rgb(223, 149, 11);
+}
+
+#logo {
+    float: left;
+    margin-left: 0;
+}
+
+.navbar {
+    background-color: white;
+    width: 100%;
+    height: 75px;
+    font-size: 1.25em;
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+}
+
+.navContent {
+    color: black;
+    width: auto;
+    float: right;
+    height: 100%;
+    padding-left: 25px;
+    padding-right: 25px;
+    margin-left: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none; 
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.navContent:hover {
+    color: orange;
+}
+
+#mainSection {
+    height: auto;
+    z-index: 1;
+    position: absolute;
+    margin-top: 150px;
+    margin-left: 5%;
+    width: 90%;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+#contentContainer {
+    display: flex;
+    justify-content: center;
+    gap: 100px;
+    width: 90%;
+}
+
+.companyName {
+    font-size: 4em;
+    padding: 10px;
+    width: 100%;
+}
+
+#companyTitle {
+    display: none;
+}
+
+#chatContainer {
+    width: 40%;
+    height: 100%;
+}
+
+.valueText {
+    font-size: 2em;
+}
+
+.valueInput {
+    font-size: 1em;
+    height: auto;
+    width: 15%;
+    text-align: center;
+}
+
+#errorMessage {
+    height: 20px;
+    font-size: 1em;
+    padding: 10px;
+    color: red;
+}
+
+#registerButton {
+    left: 30%;
+}
+
+#chat {
+    margin-top: 25px;
+    width: 100%;
+    height: 500px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    display: none;
+    flex-direction: column;
+}
+
+.chat-log {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    border-bottom: 1px solid #ccc;
+}
+
+.chat-log .message {
+    margin-bottom: 15px;
+}
+
+.chat-log .message p {
+    margin: 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.chat-log .message.sent p {
+    background-color: #e1ffc7;
+    align-self: flex-end;
+}
+
+.chat-log .message.received p {
+    background-color: #f1f0f0;
+    align-self: flex-start;
+}
+
+#guiContainer {
+    width: 60%;
+    height: 100%;
+}
+
+#gui {
+    width: 100%;
+    height: 600px;
+    position: relative;
+}
+
+#frameGUI {
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+
+#guiTitle {
+    padding: 10px;
+    opacity: 0.3;
+    background-color: black;
+    width: auto;
+    color: white;
+    height: auto;
+    font-size: 1em;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    display: none;
+}
+
+#deliveryButton {
+    top: 50%;     
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    z-index: 3;
+}
+
+.tBlackBG {
+    opacity: 0.3;
+    background-color: black;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+}
+
+#guiButton {
+    height: 75px;
+    width: 75px;
+    background-color: gray;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    color: white;
+}
+
+#guiBottomText {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+    margin-top: 25px;
+}
+
+.guiBottomText {
+    padding: 10px;
+    font-size: 2em;
+    text-align: center;
+}
+
+#actionDisplay {
+    position: absolute;
+    z-index: 5;
+    background-color: white;
+    width: auto;
+    height: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 25px;
+    display: none;
+    border-radius: 5px;
+}
+
+#actionDarkBG {
+    display: none;
+}
+
+#closeButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    height: 25px;
+    width: 25px;
+    cursor: pointer;
+    color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#closeButton:hover {
+    color: gray;
+}
+
+#actionText {
+    font-size: 1em;
+}
+
+#uploadButton {
+    margin-top: 50px;
+}
+
+#generateButton {
+    margin-top: 25px;
+}
+
+
+
+#selectionBackground {
+    /*background-color: aqua; */
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 100%; 
+    height: 100vh; 
+    background-image: url('Boxes_BG.png');
+    background-repeat: no-repeat;
+    background-size: cover; 
+    display: flex;
+    align-items: center;
+}
+
+#selectionContent {
+    display: block;
+    height: auto;
+    width: 40%;
+    margin-left: 10%;
+}
+
+
+#auctioneerChat {
+    margin-top: 25px;
+    width: 100%;
+    height: 500px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+}
