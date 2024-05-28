@@ -1,0 +1,6 @@
+{
+    "carrier_id": "testid",
+    "action": "request_auction_results",
+    "time": "123456789",
+    "payload": {}
+}

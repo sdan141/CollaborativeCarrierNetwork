@@ -1,0 +1,6 @@
+{
+    "carrier_id": "testid",
+    "action": "request_offers",
+    "time": "123456789",
+    "payload": {}
+}

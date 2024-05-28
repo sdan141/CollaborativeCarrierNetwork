@@ -1,0 +1,16 @@
+{
+    "carrier_id": "testid",
+    "action": "offer",
+    "time": "123456789",
+    "payload": {
+        "offer_id": "123",
+        "loc_pickup": {
+            "pos_x": "10",
+            "pos_y": "-10"
+        },
+        "loc_dropoff": {
+            "pos_x": "0",
+            "pos_y": "0"
+        }
+    }
+}
