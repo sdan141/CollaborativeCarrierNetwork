@@ -56,13 +56,15 @@ class Carrier:
         server_host (str): Host address of the auctioneer server
         server_port (int): Port number of the auctioneer server
     """
-    def __init__(self, carrier_id, server_host=socket.gethostname(), server_port=12349):
+    def __init__(self, carrier_id, server_host=socket.gethostname(), server_port=12349, network=None):
         """
         Initialize the Carrier object
         """
         self.carrier_id = carrier_id
         self.server_host = server_host
         self.server_port = server_port
+
+        #self.network = network
         print(f"Carrier agent {carrier_id} is ready")
 
     @json_request

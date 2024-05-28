@@ -10,6 +10,12 @@ def read_transport_requests(file_path): # path?
     print(tabulate(deliveries_df, headers='keys', tablefmt='psql'))
     return deliveries_df 
 
+def generate_random_requests(): 
+    deliveries = np.random.uniform((0,0,0,0,0),(1000,1000,1000,1000,200),(5,5))
+    deliveries_df = pd.DataFrame(deliveries,columns=['pickup_long','pickup_lat','delivery_long','delivery_lat','profit'])
+    print(f"\nAll deliveries: \n")
+    print(tabulate(deliveries_df, headers='keys', tablefmt='psql'))
+    return deliveries_df 
 
 def get_requests_below_thresh(df ,thresh=100):
     """returns a list of """
