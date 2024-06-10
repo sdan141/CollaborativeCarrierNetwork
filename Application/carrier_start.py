@@ -23,7 +23,7 @@ def select_transport_requests(carrier, locations, revenue_list):
         carrier.socketio.emit(carrier.carrier_id, {'message': "Selecting transport requests..."})
         requests_below_thresh_list = []
         
-        if(carrier.carrier_id == 'Lorenz' or carrier.carrier_id == 'Shachar' or carrier.carrier_id == 'Max'):
+        if(carrier.carrier_id == 'lorenz' or carrier.carrier_id == 'shachar' or carrier.carrier_id == 'max'):
             file_path = f"example_TR_{carrier.carrier_id}.csv"
             deliveries_df = utils.read_transport_requests(file_path, carrier)
             requests_below_thresh_list = utils.get_requests_below_thresh_old(deliveries_df, carrier)

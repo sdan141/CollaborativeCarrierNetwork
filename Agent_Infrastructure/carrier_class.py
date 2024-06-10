@@ -71,8 +71,6 @@ class Carrier:
     def register(self):
         """
         Register the carrier with the auctioneer server
-        Returns:
-            tuple: Action type and payload for the request
         """
         return "register", {}
 
@@ -83,8 +81,6 @@ class Carrier:
         Parameters:
             loc_pickup (dict): Pickup coordinates with 'pos_x' and 'pos_y'
             loc_dropoff (dict): Drop-off coordinates with 'pos_x' and 'pos_y'
-        Returns:
-            tuple: Action type and payload for the request
         """
         offer_id = str(uuid.uuid4())
         payload = {
@@ -99,8 +95,6 @@ class Carrier:
     def request_offers(self):
         """
         Request the list of current offers from the auctioneer server
-        Returns:
-            tuple: Action type and payload for the request
         """
         return "request_offers", {}
 
@@ -111,8 +105,6 @@ class Carrier:
         Parameters:
             offer_id (str): Unique ID of the offer
             bid (float): The bid amount
-        Returns:
-            tuple: Action type and payload for the request
         """
         payload = {
             "offer_id": offer_id,
@@ -124,8 +116,6 @@ class Carrier:
     def request_auction_results(self):
         """
         Request the auction results from the auctioneer server
-        Returns:
-            tuple: Action type and payload for the request
         """
         return "request_auction_results", {}
     
