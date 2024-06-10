@@ -104,7 +104,7 @@ function registerAuction() {
         return;
     }
 
-    chat = document.getElementById("chat");
+    chat = document.getElementById("carrierChat");
     regButton = document.getElementById("registerButton");
     settings = document.getElementById("settings");
     companyTitle = document.getElementById("companyTitle");
@@ -140,13 +140,23 @@ function getTime() {
     return currentTime;
 }
 
-function sendMessage(input) {
+function sendMessage(input, color) {
     var chatLog = document.getElementById('chatLog');
     var chatInput = document.getElementById('chatInput');
 
     var message = document.createElement('div');
     message.classList.add('message', 'sent');
 
+    if(color == "green")
+    {
+        message.style.backgroundColor = "#e1ffc7";
+    }
+
+    if(color == "red")
+    {
+        message.style.backgroundColor = "#ffdbc7";
+    }
+    
     var messageText = document.createElement('p');
     messageText.textContent = `(${getTime()}) ${input}`;
 
@@ -156,20 +166,23 @@ function sendMessage(input) {
     chatLog.scrollTop = chatLog.scrollHeight; 
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    var path = window.location.pathname;
+function startServer() {
+    document.getElementById("auctioneerChat").style.display = "flex";
+    document.getElementById("serverButton").style.display = "none";
 
-    if (path === '/auctioneer') {
-        initAuctioneer();
-    }
-});
+    initAuctioneer();
+}
 
 function initAuctioneer() {
     const socket = io();
 
     socket.on('connect', () => {
         socket.on('auctioneer_log', (data) => {
-            sendMessage(data.message);
+            sendMessage(data.message, "green");
+        });
+
+        socket.on('auctioneer_offers', (data) => {
+            sendMessage(data.message, "red");
         });
 
         fetch('/init_auctioneer', {
@@ -183,8 +196,13 @@ function initCarrier(companyName) {
     const socket = io();
 
     socket.on('connect', () => {
-        socket.on(companyName, (data) => {
-            sendMessage(data.message);
+        
+        socket.on("carrier_log", (data) => {
+            sendMessage(data.message, "green");
+        });
+
+        socket.on("carrier_error", (data) => {
+            sendMessage(data.message, "red");
         });
 
         fetch('/init_carrier', {
@@ -195,4 +213,115 @@ function initCarrier(companyName) {
             body: JSON.stringify({ companyName: companyName, locations: locations, profitList: profitList })
         })
     });
+}
+
+
+function createAuction(input) {
+    var chatLog = document.getElementById('auctionLog');
+
+    var logText = document.createElement('div');
+    logText.classList.add('auctionLogText');
+
+    var textSection1 = document.createElement('div');
+    textSection1.classList.add('auctionLogTextSections');
+
+    var divider = document.createElement('div');
+    divider.classList.add('auctionLogTextDivider');
+
+    var textSection2 = document.createElement('div');
+    textSection2.classList.add('auctionLogTextSections');
+
+    var auctionTitle = document.createElement('div');
+    auctionTitle.classList.add('auctionTitle');
+
+    var auctionInfo = document.createElement('div');
+    
+    var auctionStatus = document.createElement('div');
+    auctionStatus.classList.add('auctionStatus');
+
+    logText.style.backgroundColor = "#CCCCCC";
+
+    chatLog.appendChild(logText);
+    
+    logText.appendChild(textSection1);
+
+    auctionTitle.textContent = `.`;
+    logText.appendChild(divider);
+
+    logText.appendChild(textSection2);
+
+    auctionTitle.textContent = `Request ${input}`;
+    auctionInfo.textContent = `(x, y) -> (x, y), Revenue: ${input}`;
+    textSection1.appendChild(auctionTitle);
+    textSection1.appendChild(auctionInfo);
+    
+    auctionStatus.textContent = "Waiting...";
+    textSection2.appendChild(auctionStatus);
+    
+    logText.appendChild(messageText);
+
+    // chatLog.scrollTop = chatLog.scrollHeight; 
+}
+
+function biddingAuction(input) {
+    var chatLog = document.getElementById('auctionLog');
+
+    var logText = document.createElement('div');
+    logText.classList.add('auctionLogText');
+
+    var textSection1 = document.createElement('div');
+    textSection1.classList.add('auctionLogTextSections');
+
+    var divider = document.createElement('div');
+    divider.classList.add('auctionLogTextDivider');
+
+    var textSection2 = document.createElement('div');
+    textSection2.classList.add('auctionLogTextSections');
+
+    var auctionTitle = document.createElement('div');
+    auctionTitle.classList.add('auctionTitle');
+
+    var auctionInfo = document.createElement('div');
+    
+    var auctionStatus = document.createElement('div');
+    auctionStatus.classList.add('auctionStatus');
+
+    if(color == "green")
+    {
+        logText.style.backgroundColor = "#e1ffc7";
+    }
+
+    if(color == "red")
+    {
+        logText.style.backgroundColor = "#ffdbc7";
+    }
+    if(color == "orange")
+    {
+        logText.style.backgroundColor = "#FDAE44";
+    }
+    if(color == "gray")
+    {
+        logText.style.backgroundColor = "#CCCCCC";
+    }
+
+    chatLog.appendChild(logText);
+    
+    logText.appendChild(textSection1);
+
+    auctionTitle.textContent = `.`;
+    logText.appendChild(divider);
+
+    logText.appendChild(textSection2);
+
+    auctionTitle.textContent = `Request ${input}`;
+    auctionInfo.textContent = `(x, y) -> (x, y), Revenue: ${input}`;
+    textSection1.appendChild(auctionTitle);
+    textSection1.appendChild(auctionInfo);
+    
+    auctionStatus.textContent = "Waiting...";
+    textSection2.appendChild(auctionStatus);
+    
+    logText.appendChild(messageText);
+
+    // chatLog.scrollTop = chatLog.scrollHeight; 
 }

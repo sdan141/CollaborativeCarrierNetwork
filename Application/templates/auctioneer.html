@@ -15,21 +15,38 @@
                     <!-- Messages will be dynamically added here -->
                 </div>
             </div>
+
+            <button class="buttonStyle" onclick="startServer()" id="serverButton">Start server</button>
         </div>
 
 
         <div id="guiContainer">
             <div id="gui">
-                <div id="guiTitle">Starting Tour</div>
-                <img alt="Matplotlib Plot" id="frameGUI">
-                <div class="tBlackBG" id="darkBackground"></div> 
-                <div class="buttonStyle" id="deliveryButton" onclick="">Show something</div>
+                <div id="auctionChat">
+                    <div class="chat-log" id="auctionLog">
+                        <!-- Messages will be dynamically added here -->
+
+                         <!--  <div class="auctionLogText">
+                            <div class="auctionLogTextSections">
+                                <div class="auctionTitle">Request XYZ</div>
+                                <div>(x, y) -> (x, y), Revenue: 300€</div>
+                            </div>
+
+                            <div class="auctionLogTextDivider"></div>
+
+                            <div class="auctionLogTextSections">
+                                <div class="auctionStatus">Bidding...</div>
+                            </div>
+                        </div> -->
+
+                    </div>
+                </div>
             </div>
         </div>
     
     </div>
 
-    <div id="guiButton" onclick="">?</div>
+    <div id="guiButton" onclick="createAuction('Test')"></div>
 
 </section>
 

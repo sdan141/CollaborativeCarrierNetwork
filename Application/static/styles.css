@@ -131,7 +131,8 @@ body {
     left: 30%;
 }
 
-#chat {
+
+#carrierChat {
     margin-top: 25px;
     width: 100%;
     height: 500px;
@@ -157,10 +158,11 @@ body {
     margin: 0;
     padding: 10px;
     border-radius: 5px;
-}
+} 
 
 .chat-log .message.sent p {
-    background-color: #e1ffc7;
+    /* background-color: #e1ffc7; green */
+    /* background-color: #ffdbc7; red */
     align-self: flex-end;
 }
 
@@ -168,6 +170,12 @@ body {
     background-color: #f1f0f0;
     align-self: flex-start;
 }
+
+
+
+
+
+
 
 #guiContainer {
     width: 60%;
@@ -220,15 +228,19 @@ body {
     z-index: 2;
 }
 
-#guiButton {
+#guiButton { 
     height: 75px;
     width: 75px;
-    background-color: gray;
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 5px;
     color: white;
+    background-color: gray;
+    background-image: url('phone.png'); /* https://www.flaticon.com/free-icon/phone_13907361?term=swap&page=1&position=7&origin=tag&related_id=13907361 */
+    background-repeat: no-repeat;
+    background-size: cover; 
+    cursor: pointer;
 }
 
 #guiBottomText {
@@ -324,6 +336,52 @@ body {
     background-color: white;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
+    display: none;
+    flex-direction: column;
+}
+
+#auctionChat {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
     display: flex;
     flex-direction: column;
+}
+
+.auctionLogText {
+    width: 97%;
+    margin-top: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    display: flex;
+    padding: 10px;
+    text-align: center;
+    justify-content: center;
+    gap: 5px;
+    height: 100px;
+}
+
+.auctionLogTextSections {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1 1 0px;
+}
+
+.auctionLogTextDivider {
+    background-color: rgb(168, 161, 161);
+    width: 5px;
+    height: 100%;
+    border-radius: 5px;
+    display: block;
+}
+
+.auctionTitle {
+    font-size: 2em;
+}
+
+.auctionStatus {
+    font-size: 3em;
 }

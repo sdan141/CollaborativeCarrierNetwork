@@ -1,18 +1,22 @@
-from flask import Flask, render_template, request, jsonify
-from flask_socketio import SocketIO
+from flask import Flask, render_template, request, jsonify, session
+from flask_socketio import SocketIO, join_room, leave_room
 import io
 import base64
+import sys
+import os
+import uuid
 
 from generate_requests import create_random_locations, assign_deliveries
 from draw_graph import show_tour
-from auctioneer_class import *
-from carrier_class import *
-from carrier_start import start_carrier
 from calculate_tour import get_optimal_tour, create_tour_data
 from handle_files import handle_file
-from cost_model import get_cost_list, get_revenue_list, get_profit_list
+from cost_model_old import get_cost_list, get_revenue_list, get_profit_list
+
+from auctioneer_server import AuctioneerServer
+from carrier import Carrier
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 @app.route('/')
@@ -94,18 +98,43 @@ def create_response(locations, deliveries):
 
 @app.route('/init_auctioneer')
 def init_auctioneer():
-    auctioneer = Auctioneer(socketio)
-    auctioneer.start_server()
+    auctioneer_server = AuctioneerServer(socketio)
+    auctioneer_server.start_server()
 
 @app.route('/init_carrier', methods=['POST'])
 def init_carrier():
     company_name = request.json.get('companyName')
     locations = request.json.get('locations')
     profit_list = request.json.get('profitList')
-    start_carrier(company_name, locations, profit_list, socketio)
+    carrier = Carrier(company_name, socketio, config_file=None, deliveries_file=None)
+    carrier.start()
+
+@socketio.on('connect')
+def handle_connect():
+    user_id = 'test_id' # str(uuid.uuid4())
+    session['user_id'] = user_id
+    join_room(user_id)
+    print(f"User: {user_id}")
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    user_id = session.get('user_id')
+    if user_id:
+        leave_room(user_id)
+
+@socketio.on('start_expensive_task')
+def handle_start_expensive_task(data):
+    user_id = session.get('user_id')
+    if user_id:
+        # Start the task asynchronously to avoid blocking
+        socketio.start_background_task(expensive_task, data, user_id)
+
+def expensive_task(data, user_id):
+    # Simulate a long-running task
+    import time
+    time.sleep(10)  # Replace this with actual processing logic
+    result = {'status': 'Task completed', 'data': data}
+    socketio.emit('task_completed', result, room=user_id)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
-
-
-
+    socketio.run(app, port=int(sys.argv[1]), debug=True)
