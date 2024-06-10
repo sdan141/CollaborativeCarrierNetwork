@@ -1,0 +1,32 @@
+{
+    "carrier_id": "testid",
+    "action": "request_offers",
+    "time": "123456789",
+    "payload": {
+        "status": "OK",
+        "offer_list": [
+            {
+                "offer_id": "12345",
+                "loc_pickup": {
+                    "pos_x": "10",
+                    "pos_y": "-10"
+                },
+                "loc_dropoff": {
+                    "pos_x": "0",
+                    "pos_y": "0"
+                }
+            },
+            {
+                "offer_id": "69420",
+                "loc_pickup": {
+                    "pos_x": "20",
+                    "pos_y": "-10"
+                },
+                "loc_dropoff": {
+                    "pos_x": "1",
+                    "pos_y": "0"
+                }
+            }
+        ]
+    }
+}

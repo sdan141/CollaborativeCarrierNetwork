@@ -1,0 +1,10 @@
+{
+    "carrier_id" : "testid",
+    "action" : "offer",
+    "time" : "123456789",
+    "payload" : {
+        "offer_id" : "123",
+        "next_auction": "123456",
+        "response" : "OK"
+    }
+}

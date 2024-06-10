@@ -1,0 +1,6 @@
+{
+    "carrier_id" : "TESTID",
+    "action" : "<action>",
+    "time" : "12345",
+    "payload" : {}
+}

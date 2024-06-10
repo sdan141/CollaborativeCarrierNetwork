@@ -1,0 +1,9 @@
+{
+    "carrier_id": "testid",
+    "action": "bid",
+    "time": "123456789",
+    "payload": {
+        "offer_id": "1234",
+        "bid": "123"
+    }
+}
