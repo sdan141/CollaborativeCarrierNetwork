@@ -34,7 +34,7 @@ def get_requests_below_thresh(df ,thresh=100):
                 "pos_x": transport_request.delivery_long, 
                 "pos_y": transport_request.delivery_lat
                 }
-            profit = transport_request.profit,
+            profit = transport_request.profit
             revenue = transport_request.revenue
             requests_list.append((loc_pickup, loc_dropoff, profit, revenue))
 

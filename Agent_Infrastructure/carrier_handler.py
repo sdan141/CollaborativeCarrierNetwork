@@ -1,6 +1,9 @@
 import socket
 import threading
 import json
+import time
+
+BASE_TIMEOUT = 20
 
 class CarrierHandler(threading.Thread):
 
@@ -18,6 +21,8 @@ class CarrierHandler(threading.Thread):
                 if action == 'register':
                     self.register_carrier(data)
                 elif action == 'offer':
+                    if self.auctioneer.auction_time is None and data['carrier_id'] in self.auctioneer.registered_carriers:
+                        self.auctioneer.auction_time = int(time.time()) + BASE_TIMEOUT
                     self.receive_offer(data)
                 elif action == 'request_offer':
                     self.send_offer(data)
@@ -145,7 +150,7 @@ class CarrierHandler(threading.Thread):
             return {"status": "NO_RESULTS_PHASE"}
         for offer in self.auctioneer.offers:
             if offer.on_auction:
-                self.auctioneer.active_carrier.append(carrier_id)
+                self.auctioneer.active_carriers.append(carrier_id)
                 payload = {
                 "status": "OK",
                 "offer": offer.to_dict()
@@ -168,7 +173,7 @@ class CarrierHandler(threading.Thread):
                 payload = {
                 "status": "OK",
                 "offer": offer.to_dict(),
-                "next_round": str(self.next_round)
+                "next_round": self.auctioneer.next_round
                 }
                 return payload
         return {"status": "NO_CONFIRMATION_AVAILABLE"}

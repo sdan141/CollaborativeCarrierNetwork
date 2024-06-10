@@ -2,7 +2,7 @@ import time
 from carrier_handler import CarrierHandler
 from offer import Offer
 
-BASE_TIMEOUT = 5
+BASE_TIMEOUT = 20
 MAX_ROUNDS = 5
 
 class Auctioneer:
@@ -25,6 +25,7 @@ class Auctioneer:
         self.active_carriers = []
         self.auction_time = None
         self.next_round = True
+        self.phase = "REGIST"
         
 
     def handle_auction_phases(self):
@@ -49,21 +50,22 @@ class Auctioneer:
                         self.auction_time = int(time.time()) + BASE_TIMEOUT
                         self._wait_until(self.auction_time)
 
-                        self.phase = "RESULT"
+                        self.phase = "RESULTS"
                         auction.update_results()
                         print("\nEntering results phase")
                         self.auction_time = int(time.time()) + BASE_TIMEOUT
                         self._wait_until(self.auction_time)
 
                         self.phase = "CONFIRM"
+                        print("\nEntering results phase")
+                        self.auction_time = int(time.time()) + BASE_TIMEOUT 
                         self.check_active_carriers()
                         if auction.winner != "NONE":
                             sold += 1
-
                         if len(self.offers)-1 == i:
                             if not sold and not auction.bids: # no offer was sold and the current offer has no valid bids
                                 self.next_round = False
-                            self.update_auction_list()
+                            self.update_auction_list()                  
                         self._wait_until(self.auction_time)
                         auction.on_auction = False
 
