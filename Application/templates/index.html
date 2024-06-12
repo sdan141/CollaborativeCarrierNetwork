@@ -9,9 +9,9 @@
     <body>
         <nav class="navbar">
             <a class="navContent" id="logo" href="{{ url_for('selection') }}">Python Collaborative Carrier Network</a>
-            <a class="navContent">Other</a>
+            <!-- <a class="navContent">Other</a> -->
             <a class="navContent" href="https://collaborating.tuhh.de/e16/courses/software-development/ss24/group09" target="_blank">Gitlab</a>
-            <a class="navContent">Documentation</a> 
+            <a class="navContent" href="{{ url_for('simulation') }}">Simulation</a> 
         </nav>
 
         {% block content %}{% endblock %}

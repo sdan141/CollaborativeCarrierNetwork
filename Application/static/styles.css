@@ -43,7 +43,7 @@ body {
     width: 100%;
     height: 75px;
     font-size: 1.25em;
-    position: absolute;
+    position: fixed;
     z-index: 2;
     top: 0;
     left: 0;
@@ -328,7 +328,6 @@ body {
     margin-left: 10%;
 }
 
-
 #auctioneerChat {
     margin-top: 25px;
     width: 100%;
@@ -384,4 +383,62 @@ body {
 
 .auctionStatus {
     font-size: 3em;
+}
+
+#simulationContent {
+    height: auto;
+    position: absolute;
+    margin-top: 150px;
+    margin-left: 5%;
+    width: 90%;
+}
+
+.simulationSettings {
+    width: 100%;
+    background-color: rebeccapurple;
+}
+
+#consoleContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    padding-bottom: 100px;
+}
+
+.consoleRow {
+    display: flex;
+    gap: 25px;
+}
+
+.consoles {
+    flex: 1 1 0;
+    background-color: lightgray;
+    box-sizing: border-box;
+    height: 400px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.consoleTitle {
+    width: 100%;
+    padding: 10px;
+    background-color: orange;
+    text-align: left;
+}
+
+.carrierConsoleTitle {
+    width: 100%;
+    padding: 10px;
+    background-color: rgb(48, 216, 48);
+    text-align: left;
+}
+
+.consoleChat {
+    height: 100%;
+    width: 100%;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    box-sizing: border-box;
 }

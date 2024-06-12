@@ -39,6 +39,11 @@ def auctioneer():
     """Load auctioneer.html"""
     return render_template('auctioneer.html')
 
+@app.route('/simulation')
+def simulation():
+    """Load simulation.html"""
+    return render_template('simulation.html')
+
 @app.route('/generate_deliveries', methods=['GET'])
 def generate_deliveries():
     locations = create_random_locations()
