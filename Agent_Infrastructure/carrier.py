@@ -10,7 +10,7 @@ import numpy as np
 
 class Carrier:
 
-    def __init__(self, carrier_id, socketio=None, server_host=socket.gethostname(), server_port=12350, config_file='config.yaml', deliveries_file='config.yaml'):
+    def __init__(self, carrier_id, socketio=None, server_host=socket.gethostname(), server_port=12351, config_file='config.yaml', deliveries_file='config.yaml'):
         self.carrier_id = carrier_id
         self.server_host = server_host
         self.server_port = server_port
@@ -30,10 +30,6 @@ class Carrier:
         if not response or 'payload' not in response or response['payload']['status'] != 'OK':
             print("Registration failed:", response)
             exit()
-
-        if response['payload']['status'] != 'OK':
-            print(response['payload']['status'])
-            exit()
         
         self.handle_requests(response)
 
@@ -45,27 +41,26 @@ class Carrier:
                 #print("\n Auctioneer response to offer:")
                 #print(json.dumps(response, indent=2, default=str))
         auction_time = response["timeout"] #if respond["timeout"]!="NONE" else time.time()+30
-        time.sleep(abs(auction_time-time.time())+2)  # Wait to auction time
+        self._wait_until(auction_time+2)  # Wait to auction time
 
         while True:
             response = self.request_offer() # Request current offers
             print("\n Auctioneer response to request_offers:")
             print(json.dumps(response, indent=2, default=str))
-
             offer = response["payload"]["offer"]
 
             ## Calculate bids for each offer and send bid for the most profitable offer
 
             auction_time = response["timeout"]
-            time.sleep(abs(auction_time-time.time())+2)  # Wait to auction time
+            self._wait_until(auction_time+2)  # Wait to auction time
 
             ### Calculate a bid for an offer (more than one?)
             ### Should implement start_time/ timeout for fetching offers?
 
             offer_id = offer['offer_id']
-            min_price = offer['min_price']
+            #min_price = offer['min_price']
             revenue = offer['revenue']
-            random_bid = np.random.uniform(float(min_price),float(revenue-min_price))
+            random_bid = np.random.uniform(100,float(revenue)-150)
             print(f"\nrandom bid: {random_bid}\n")
             bid = np.random.choice([0, random_bid])
 
@@ -74,7 +69,7 @@ class Carrier:
             print(json.dumps(response, indent=2, default=str))
 
             auction_time = response["timeout"]
-            time.sleep(abs(auction_time-time.time())+2)  # Wait to auction time
+            self._wait_until(auction_time+2)  # Wait to auction time
 
             response = self.request_auction_results()  # Request auction results
             print("\n Auctioneer response to request_results:")
@@ -82,7 +77,7 @@ class Carrier:
 
             auction_time = response["timeout"]
 
-            time.sleep(abs(auction_time-time.time())+2)  # Wait to auction time
+            self._wait_until(auction_time+2)  # Wait to auction time
             
             response = self.confirm_results()
             print("\n Auctioneer response to confirm_results:")
@@ -95,7 +90,11 @@ class Carrier:
             auction_time = response["timeout"]
 
             ### Save the relevant results (offer sold/ winning bid)
-            time.sleep(abs(auction_time-time.time())+2)  # Wait to auction time
+            self._wait_until(auction_time+2)
+
+    def _wait_until(self, timeout):
+        while time.time() < timeout:
+            time.sleep(1)
 
 
     def connect_to_auctioneer(self):

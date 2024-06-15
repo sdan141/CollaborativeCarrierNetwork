@@ -47,3 +47,16 @@ def evaluate_transport_request(transport_request):
 def random_cost_model():
     costs = np.random.uniform((100,25,50,15),(300,100,100,50),4)
     return {'a1': costs[0], 'a2': costs[1], 'b1': costs[2], 'b2': costs[3]}
+
+
+def flatten_and_round_dict(d, decimal_places=2):
+    flattened_dict = {}
+    for key, value in d.items():
+        if isinstance(value, dict):
+            for sub_key, sub_value in value.items():
+                if isinstance(sub_value, float):
+                    sub_value = round(sub_value, decimal_places)
+                flattened_dict[f"{key}_{sub_key}"] = sub_value
+        else:
+            flattened_dict[key] = value
+    return flattened_dict

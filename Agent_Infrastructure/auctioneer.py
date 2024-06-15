@@ -1,8 +1,12 @@
 import time
 from carrier_handler import CarrierHandler
-from offer import Offer
+from offer import Offer, Auction
+import pandas as pd
+import utilities as utils
+from tabulate import tabulate
+import math
 
-BASE_TIMEOUT = 20
+BASE_TIMEOUT = 5
 MAX_ROUNDS = 5
 
 class Auctioneer:
@@ -32,15 +36,21 @@ class Auctioneer:
         while self.next_round:
             if self.auction_time is not None: # at least one registered carrier has sent offers
                 for n_round in range(MAX_ROUNDS): # iterating rounds
+                    print(f"\nAuction round {n_round}/{MAX_ROUNDS}\n")
+
                     sold = 0 # for counting how many offers have been sold in the round
+                    if not n_round:
+                        self._wait_until(self.auction_time)
+                    
+                    self.print_auction_list()
 
-                    for i in range(len(self.offers)): # iterating auction list
-                        if not n_round:
-                            self._wait_until(self.auction_time)
-
-                        self.phase = "REQ_OFFER"
-                        auction = self.offers[i]
+                    for i, auction in enumerate(self.offers): # iterating auction list
+                        print(f"\nOffer {i}/{len(self.offers)} on sale\n")
+                        # self.auction = Auction(self.offers[i])
+                        # auction = self.offers[i]
                         auction.on_auction = True
+                        # set on auction....in Auction class auction.on_auction = True
+                        self.phase = "REQ_OFFER"
                         print("\nEntering offer request phase")
                         self.auction_time = int(time.time()) + BASE_TIMEOUT
                         self._wait_until(self.auction_time)
@@ -55,23 +65,23 @@ class Auctioneer:
                         print("\nEntering results phase")
                         self.auction_time = int(time.time()) + BASE_TIMEOUT
                         self._wait_until(self.auction_time)
+                        self.check_active_carriers()
 
                         self.phase = "CONFIRM"
-                        print("\nEntering results phase")
+                        print("\nEntering confirmation phase")
                         self.auction_time = int(time.time()) + BASE_TIMEOUT 
-                        self.check_active_carriers()
                         if auction.winner != "NONE":
                             sold += 1
                         if len(self.offers)-1 == i:
-                            if not sold and not auction.bids: # no offer was sold and the current offer has no valid bids
-                                self.next_round = False
-                            self.update_auction_list()                  
+                            if (not sold and not auction.bids) or all([offer.winner!="NONE" for offer in self.offers]): # no offer was sold and the current offer has no valid bids or no offers in the list
+                                self.next_round = False                 
                         self._wait_until(self.auction_time)
                         auction.on_auction = False
 
+                    self.update_auction_list() 
                     if not self.next_round:
                         print("\nAuction day closed server restarts tomorrow...")
-                        break
+                        return
   
 
     def _wait_until(self, timeout):
@@ -104,3 +114,8 @@ class Auctioneer:
             if offer.winner == "NONE" and offer.carrier_id in self.registered_carriers:
                 new_list.append(offer)
         self.offers = new_list
+
+    def print_auction_list(self):
+        list_dict =  [utils.flatten_and_round_dict(offer.to_dict()) for offer in self.offers]
+        offers_df = pd.DataFrame(list_dict).drop(columns=['offer_id'])
+        print(tabulate(offers_df, headers='keys', tablefmt='psql'))

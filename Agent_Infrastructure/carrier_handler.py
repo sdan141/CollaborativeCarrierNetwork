@@ -3,7 +3,7 @@ import threading
 import json
 import time
 
-BASE_TIMEOUT = 20
+BASE_TIMEOUT = 5
 
 class CarrierHandler(threading.Thread):
 
@@ -22,10 +22,10 @@ class CarrierHandler(threading.Thread):
                     self.register_carrier(data)
                 elif action == 'offer':
                     if self.auctioneer.auction_time is None and data['carrier_id'] in self.auctioneer.registered_carriers:
-                        self.auctioneer.auction_time = int(time.time()) + BASE_TIMEOUT
+                        self.auctioneer.auction_time = int(time.time()) + 2*BASE_TIMEOUT
                     self.receive_offer(data)
                 elif action == 'request_offer':
-                    self.send_offer(data)
+                        self.send_offer(data)
                 elif action == 'bid':
                     self.receive_bid(data)
                 elif action == 'request_auction_results':
@@ -99,10 +99,13 @@ class CarrierHandler(threading.Thread):
         carrier_id = data['carrier_id']
         if self.auctioneer.phase != "REQ_OFFER":
             return {"status": "OFFER_REQUEST_TIMEOUT"}
-        if carrier_id not in self.auctioneer.registered_carriers:
+        elif carrier_id not in self.auctioneer.registered_carriers:
             return {"status": "NOT_REGISTERED"}
-        if not self.auctioneer.offers:
+        elif not self.auctioneer.offers:
             return {"status": "NO_OFFERS_AVAILABLE"}
+        #for offer in self.auctioneer.offers: print(f"\n on auction: {offer.on_auction}") ### CONTROLL
+        while not any([offer.on_auction for offer in self.auctioneer.offers]):
+            continue
         for offer in self.auctioneer.offers:
             if offer.on_auction:
                 payload = {
@@ -110,9 +113,8 @@ class CarrierHandler(threading.Thread):
                 "offer": offer.to_dict()
                 }
                 return payload
-        return {"status": "NO_OFFERS_AVAILABLE"}
-             
-    
+        return {"status": "NO_ACTIVE_OFFERS"}
+        
 
     @send_response("bid")
     def receive_bid(self, data):
