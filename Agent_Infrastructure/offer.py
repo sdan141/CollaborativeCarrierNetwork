@@ -37,13 +37,14 @@ class Auction:
 
 class Offer:
 
-    def __init__(self, carrier_id, offer_id, loc_pickup, loc_dropoff, min_price, revenue):
+    def __init__(self, carrier_id, offer_id, loc_pickup, loc_dropoff, profit=None, revenue=None, cost=None):
         self.carrier_id = carrier_id    
         self.offer_id = offer_id        
         self.loc_pickup = loc_pickup
         self.loc_dropoff = loc_dropoff
-        self.min_price = min_price
+        self.profit = profit
         self.revenue = revenue
+        self.cost = cost
         self.bids = {}     
         self.on_auction = False     
         self.winner = "NONE"      
