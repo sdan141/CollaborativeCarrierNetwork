@@ -106,14 +106,24 @@ class CarrierHandler(threading.Thread):
         #for offer in self.auctioneer.offers: print(f"\n on auction: {offer.on_auction}") ### CONTROLL
         while not any([offer.on_auction for offer in self.auctioneer.offers]):
             continue
+        loc_pickup = []
+        loc_dropoff = []
+        revenue = 0 
         for offer in self.auctioneer.offers:
             if offer.on_auction:
-                payload = {
-                "status": "OK",
-                "offer": offer.to_dict()
-                }
-                return payload
-        return {"status": "NO_ACTIVE_OFFERS"}
+                loc_pickup.append(offer.loc_pickup) #{'pos_x':.., 'pos_y': ...}
+                loc_dropoff.append(offer.loc_dropoff)
+                revenue += offer.revenue
+        payload = {
+            "status": "OK",
+            "offer": {
+                "offer_id": self.auctioneer.id_on_auction, # boundle id for bundle
+                "loc_pickup": loc_pickup,
+                "loc_dropoff": loc_dropoff,
+                "revenue": revenue
+                }}
+        return payload
+        #return {"status": "NO_ACTIVE_OFFERS"}
         
 
     @send_response("bid")
@@ -130,15 +140,20 @@ class CarrierHandler(threading.Thread):
         offer_id = data['payload']['offer_id']
         bid = data['payload']['bid']
 
+        ##################################  
+        # need to change auctioneer can get bid for a bundle => offer_id is a bundle id !
+        # write function for auctioneer class -> calculate_share()
         for offer in self.auctioneer.offers:
             if offer.offer_id == offer_id and offer.on_auction:
-                offer.add_bid(carrier_id, bid)
+                # bid_share = self.auctioneer.calculate_share(offer_id, bid)
+                offer.add_bid(carrier_id, bid) # bid -> bid_share
                 payload = {
                 "status": "OK",
                 "offer_id": offer_id
                 }
                 return payload
         return {"status": "INVALID_BID"}
+        ##################################
 
     @send_response("request_auction_results")
     def send_results(self, data):
@@ -151,6 +166,7 @@ class CarrierHandler(threading.Thread):
         if self.auctioneer.phase != "RESULTS":
             return {"status": "NO_RESULTS_PHASE"}
         for offer in self.auctioneer.offers:
+        #### need to change : should modify to append each offer on auction and send after for loop
             if offer.on_auction:
                 self.auctioneer.active_carriers.append(carrier_id)
                 payload = {
@@ -171,6 +187,7 @@ class CarrierHandler(threading.Thread):
         if carrier_id not in self.auctioneer.registered_carriers:
             return {"status": "NOT_REGISTERED"}
         for offer in self.auctioneer.offers:
+        #### need to change : should modify to append each offer on auction and send after for loop
             if offer.on_auction:
                 payload = {
                 "status": "OK",

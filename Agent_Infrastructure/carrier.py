@@ -9,7 +9,7 @@ import numpy as np
 
 class Carrier:
 
-    def __init__(self, carrier_id, socketio=None, server_host=socket.gethostname(), server_port=12351, path_config='config.yaml', path_deliveries='config.yaml'):
+    def __init__(self, carrier_id, socketio=None, server_host=socket.gethostname(), server_port=12350, path_config='config.yaml', path_deliveries='config.yaml'):
         self.carrier_id = carrier_id
         '''
         self.socketio = socketio
@@ -31,10 +31,16 @@ class Carrier:
         if randomized:
             random_bid = np.random.uniform(100,revenue-150)
             bid = np.random.choice([0, random_bid])
+        
+        # offer['loc_pickup'] = [{'pos_x': ..., 'pos_y': ...}, {'pos_x': ..., 'pos_y': ...}]
         else:
-            loc_pickup = utils.dict_to_float(offer['loc_pickup']).values()
-            loc_dropoff = utils.dict_to_float(offer['loc_dropoff']).values()
-            bid = self.routing.calculate_bid(tuple(loc_pickup), tuple(loc_dropoff), revenue)
+            loc_pickup = []
+            loc_dropoff = []
+            for i in range(len(offer['loc_pickup'])):
+                loc_pickup.append(tuple(utils.dict_to_float(offer['loc_pickup'][i]).values()))
+                loc_dropoff.append(tuple(utils.dict_to_float(offer['loc_dropoff'][i]).values()))
+
+            bid = self.routing.calculate_bid(loc_pickup, loc_dropoff, revenue)
         return offer_id, bid
     
     def update_offer_list(self, offer):
@@ -47,13 +53,18 @@ class Carrier:
         if not response or 'payload' not in response or response['payload']['status'] != 'OK':
             print("Registration failed:", response)
             exit()
-
+        
+        print(f"\nRegistered for auction!\n")
         # perform sending offers below threshold
         requests_below_thresh_list = self.routing.get_requests_below_threshold()
+        print(f"\nSending offers with profit below threshold...\n")
         if requests_below_thresh_list:
             for offer in requests_below_thresh_list:
                 response = self.request_handler.send_offer(offer) # Send an offer
-
+        else:
+            print(f'\n No requests below threshold, you are good to go!\n')
+            exit()
+            
         auction_time = response["timeout"] #if respond["timeout"]!="NONE" else time.time()+30
         self._wait_until(auction_time+2)  # Wait to auction time
 

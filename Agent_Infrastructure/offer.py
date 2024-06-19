@@ -39,8 +39,8 @@ class Offer:
 
     def __init__(self, carrier_id, offer_id, loc_pickup, loc_dropoff, profit=None, revenue=None, cost=None):
         self.carrier_id = carrier_id    
-        self.offer_id = offer_id        
-        self.loc_pickup = loc_pickup
+        self.offer_id = offer_id # [offer_id]        
+        self.loc_pickup = loc_pickup # [(x,y)] dict {x_pos:, y_pos:} => {x_pos:[..], ..}
         self.loc_dropoff = loc_dropoff
         self.profit = profit
         self.revenue = revenue
@@ -54,10 +54,12 @@ class Offer:
         self.bids[bidder] = bid
 
     def get_highest_bid(self):
-        if not any(list(self.bids.values())):
-            return None 
+        if not self.bids.values():
+            return False 
         else:
             highest_bid = max(self.bids.items(), key=lambda k: k[1])
+            if highest_bid[1] <= self.profit:
+                return False
             return highest_bid
     
     def update_results(self):

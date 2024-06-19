@@ -23,10 +23,6 @@ class Routing(AlgorithmBase):
         super().__init__(locations, assignmets)
 
 
-    def get_mariginal_revenue(self, loc_pickup, loc_dropoff):
-        return self.cost_model.get_mariginal_revenue(loc_pickup, loc_dropoff)
-
-
     def create_offer_list(self, path_deliveries):
         if not path_deliveries:
             self.deliveries_df = utils.generate_random_locations()
@@ -43,14 +39,14 @@ class Routing(AlgorithmBase):
                 "pos_x": offer.delivery_long, 
                 "pos_y": offer.delivery_lat
                 }
-            revenue = self.get_mariginal_revenue(loc_pickup, loc_dropoff)
+            revenue = self.cost_model.get_mariginal_revenue(loc_pickup, loc_dropoff)
             offers.append(Offer(self.carrier_id, offer_id, loc_pickup, loc_dropoff, revenue=revenue))
         return offers
 
 
     def set_depot_location(self, config_file):
         if not config_file:
-            loc = (np.random.uniform(0,300), np.random.uniform(0,300)) 
+            loc = (np.random.uniform(-100,100), np.random.uniform(-100,100)) 
         else:
             with open(config_file, 'rb') as stream:
                 try:
@@ -104,9 +100,10 @@ class Routing(AlgorithmBase):
 
 
     def calculate_bid(self, loc_pickup, loc_dropoff, revenue):
-        optimal_tour = float(self.optimal_tour['distance'])
-        optimal_tour_with_offer = float(self.get_optimal_tour(ignore_indices=self.on_auction_indices, include_request=[loc_pickup, loc_dropoff])['distance'])
-        margin_distance = optimal_tour_with_offer - optimal_tour
+        optimal_tour_distance = float(self.optimal_tour['distance'])
+        optimal_tour_with_offer_distance = float(self.get_optimal_tour(ignore_indices=self.on_auction_indices,\
+                                                              include_pickups=loc_pickup, include_dropoffs=loc_dropoff)['distance'])
+        margin_distance = optimal_tour_with_offer_distance - optimal_tour_distance
         margin_cost = self.cost_model.get_marginal_cost(margin_distance)
         profit = revenue - margin_cost
 
@@ -114,15 +111,15 @@ class Routing(AlgorithmBase):
 
 
     def update_offer_list(self, offer_to_update):
-
-        if self.carrier_id==offer_to_update['offer_id']:
+        if self.carrier_id==offer_to_update['offeror']:
+            # carrier is the offeror and maybe the winner
             for offer in self.offers:
                 if offer_to_update['offer_id']==offer.offer_id:
                     offer.winner = offer_to_update['winner']
                     offer.winning_bid = offer_to_update['winning_bid']
-        else:
-            self.offers.append(self.add_offer(offer_to_update))       
-
+        else:                  
+            # carrier is the winner but not the offeror          
+            self.offers.append(self.add_offer(offer_to_update)) 
 
     def add_offer(self, offer):
         carrier_id = offer['offeror']

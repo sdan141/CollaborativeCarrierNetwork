@@ -7,7 +7,7 @@ class AuctioneerServer:
     """
     Class to represent the auctioneer server handling all communication.
     """
-    def __init__(self, host=socket.gethostname(), port=12351):
+    def __init__(self, host=socket.gethostname(), port=12350):
         self.host = host
         self.port = port
         self.auctioneer = Auctioneer()
@@ -38,7 +38,10 @@ class AuctioneerServer:
             print(f"Connection from {addr} has been established.")
             carrier_handler = CarrierHandler(self.auctioneer, client_socket)
             carrier_handler.start()
-
+        
+        carrier_handler.join()
+        self.stop_server()
+        exit()
 
     def stop_server(self):
         self._stop_event.set()

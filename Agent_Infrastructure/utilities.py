@@ -11,7 +11,7 @@ def read_transport_requests(file_path): # path?
     return deliveries_df 
 
 def generate_random_locations(): 
-    deliveries = np.random.uniform((0,0,0,0),(300,300,300,300),(5,4))
+    deliveries = np.random.uniform((-100,-100,-100,-100),(100,100,100,100),(5,4))
     deliveries_df = pd.DataFrame(deliveries,columns=['pickup_long','pickup_lat','delivery_long','delivery_lat'])
     print(f"\nAll deliveries: \n")
     print(tabulate(deliveries_df, headers='keys', tablefmt='psql'))
@@ -59,9 +59,10 @@ def get_distance(loc_pickup, loc_dropoff, mode="euclid"):
     
 
 def random_cost_model():
-    costs = np.random.uniform((100,25,10,5),(150,50,20,10),4)
+    costs = np.random.uniform((256,32,8,4),(512,64,16,8),4)
+    print(f"\nCarrier random cost model:\n a_1 = {round(costs[0],2)}, a_2 = {round(costs[1],2)}, \
+                                           b_1 = {round(costs[2],2)}, b_2 = {round(costs[3],2)}\n")
     return {'a1': costs[0], 'a2': costs[1], 'b1': costs[2], 'b2': costs[3]}
-
 
 def flatten_and_round_dict(d, decimal_places=4): # function for pretty printing
     flattened_dict = {}
