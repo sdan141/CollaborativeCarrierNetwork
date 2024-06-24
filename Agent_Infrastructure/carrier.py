@@ -95,7 +95,6 @@ class Carrier:
             auction_time = response["timeout"]
             self._wait_until(auction_time+2)  # Wait to auction time
 
-            # perform request results confirmation and next round
             response = self.request_handler.confirm_results()
             print("\n Auctioneer response to confirm_results:")
             print(json.dumps(response, indent=2, default=str))
@@ -106,8 +105,8 @@ class Carrier:
             received_offers = response["payload"]["offers"]
 
             for received_offer in received_offers:
-                self.update_offer_list(received_offer)
-            
+                self.update_offer_list(received_offer)              
+
             if not response["payload"]["next_round"]:
 
                 #### see which offers were not sold, calculate final profit, compare profits

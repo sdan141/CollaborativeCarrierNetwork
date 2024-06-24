@@ -58,8 +58,6 @@ class CarrierHandler(threading.Thread):
                     "timeout": self.auctioneer.auction_time if self.auctioneer.auction_time else "NONE",
                     "payload": func(self, data)
                 }
-                print("full_response:")
-                print(json.dumps(response))
                 self.carrier_socket.send(json.dumps(response).encode('utf-8'))
                 self.carrier_socket.close()
             return decorator
@@ -203,13 +201,11 @@ class CarrierHandler(threading.Thread):
                 results_available = 1
 
         if results_available:
-            # send results, but carrier has to 
+            # send results
             payload = {
                 "status": "OK",
                 "offers": [ob.__dict__ for ob in offers_on_auction]
             }
-            print("payload:")
-            print(json.dumps(payload))
             return payload
 
         return {"status": "NO_RESULTS_AVAILABLE"}
@@ -224,13 +220,22 @@ class CarrierHandler(threading.Thread):
             return {"status": "CONFIRMATION_TIMEOUT"}
         if carrier_id not in self.auctioneer.registered_carriers:
             return {"status": "NOT_REGISTERED"}
+        
+        results_available = 0
+        offers_on_auction = []
+
         for offer in self.auctioneer.offers:
-        #### need to change : should modify to append each offer on auction and send after for loop
             if offer.on_auction:
-                payload = {
+                offers_on_auction.append(offer)
+                results_available = 1
+
+        if results_available:
+            # send results
+            payload = {
                 "status": "OK",
-                "offer": offer.to_dict(),
+                "offers": [ob.__dict__ for ob in offers_on_auction],
                 "next_round": self.auctioneer.next_round
-                }
-                return payload
+            }
+            return payload
+        
         return {"status": "NO_CONFIRMATION_AVAILABLE"}
