@@ -2,6 +2,10 @@ import socket
 import threading
 import json
 import time
+import re
+import utilities as utils
+import traceback #tmp
+
 
 BASE_TIMEOUT = 5
 
@@ -37,6 +41,7 @@ class CarrierHandler(threading.Thread):
                     print("Invalid action from carrier. Connection closed.")
         except Exception as e:
             print(f"\nError occurred during handling connection with carrier. \nError: {e}\n")
+            print(traceback.format_exc()) #tmp
         self.carrier_socket.close()
 
 
@@ -53,6 +58,8 @@ class CarrierHandler(threading.Thread):
                     "timeout": self.auctioneer.auction_time if self.auctioneer.auction_time else "NONE",
                     "payload": func(self, data)
                 }
+                print("full_response:")
+                print(json.dumps(response))
                 self.carrier_socket.send(json.dumps(response).encode('utf-8'))
                 self.carrier_socket.close()
             return decorator
@@ -131,6 +138,8 @@ class CarrierHandler(threading.Thread):
         """
         Receive a bid from a carrier.
         """
+        error = 1
+
         carrier_id = data['carrier_id']
         if self.auctioneer.phase != "BID":
             return {"status": "BIDDING_TIMEOUT"}
@@ -140,20 +149,39 @@ class CarrierHandler(threading.Thread):
         offer_id = data['payload']['offer_id']
         bid = data['payload']['bid']
 
-        ##################################  
-        # need to change auctioneer can get bid for a bundle => offer_id is a bundle id !
-        # write function for auctioneer class -> calculate_share()
         for offer in self.auctioneer.offers:
-            if offer.offer_id == offer_id and offer.on_auction:
-                # bid_share = self.auctioneer.calculate_share(offer_id, bid)
-                offer.add_bid(carrier_id, bid) # bid -> bid_share
-                payload = {
+            #check if it is bundle
+            if re.match("bundle_.*", offer_id): # Case: Bundle
+
+                #Get bundle_key to access the offers in bundles
+                first_offer_in_bundle = offer_id.replace("bundle_", "")
+
+                bundle_key = utils.get_key_from_bundle_by_first_element(self.auctioneer.bundles, first_offer_in_bundle)
+
+                # Check if offer is in Bundle
+                if offer.offer_id in self.auctioneer.bundles[bundle_key]:
+                    # obtain bid and distribute it to all single offers; here one case
+                    bid_share = self.auctioneer.calculate_share(offer_id, offer.offer_id, bid)
+                    offer.add_bid(carrier_id, bid_share)
+                    error = 0
+
+            else: # Case: No Bundle (Single Offer)
+                if offer.offer_id == offer_id and offer.on_auction:
+                    offer.add_bid(carrier_id, bid)
+                    error = 0
+        #-- for offer in self.auctioneer.offers
+
+        # Send response here
+        print("Before payload")
+        if not error:
+            payload = {
                 "status": "OK",
                 "offer_id": offer_id
                 }
-                return payload
+            return payload
+
         return {"status": "INVALID_BID"}
-        ##################################
+        
 
     @send_response("request_auction_results")
     def send_results(self, data):
@@ -165,17 +193,27 @@ class CarrierHandler(threading.Thread):
             return {"status": "NOT_REGISTERED"}
         if self.auctioneer.phase != "RESULTS":
             return {"status": "NO_RESULTS_PHASE"}
+        
+        results_available = 0
+        offers_on_auction = []
+
         for offer in self.auctioneer.offers:
-        #### need to change : should modify to append each offer on auction and send after for loop
             if offer.on_auction:
-                self.auctioneer.active_carriers.append(carrier_id)
-                payload = {
+                offers_on_auction.append(offer)
+                results_available = 1
+
+        if results_available:
+            # send results, but carrier has to 
+            payload = {
                 "status": "OK",
-                "offer": offer.to_dict()
-                }
-                return payload
+                "offers": [ob.__dict__ for ob in offers_on_auction]
+            }
+            print("payload:")
+            print(json.dumps(payload))
+            return payload
+
         return {"status": "NO_RESULTS_AVAILABLE"}
-    
+
     @send_response("confirm")
     def confirm(self, data):
         """

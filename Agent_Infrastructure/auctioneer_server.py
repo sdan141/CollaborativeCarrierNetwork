@@ -28,6 +28,7 @@ class AuctioneerServer:
     def handle_connections(self):
         with threading.Lock():   
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Hack: "Address already in use"
             self.server_socket.bind((self.host, self.port))
             self.server_socket.listen(5)
             print("Auctioneer server started, waiting for connections...")

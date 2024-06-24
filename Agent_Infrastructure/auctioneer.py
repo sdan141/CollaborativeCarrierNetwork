@@ -8,6 +8,7 @@ import numpy as np
 
 BASE_TIMEOUT = 5
 MAX_ROUNDS = 5
+BUNDLE_ROUNDS = 2
 
 class Auctioneer:
     """
@@ -69,49 +70,113 @@ class Auctioneer:
                         print(f'\nBundles: {self.bundles}\n')
 
                     self.print_auction_list()
-                    for i in range(len(self.offers)): # iterating auction list
-                        print(f"\nOffer {i+1}/{len(self.offers)} on sale\n")
 
-                        ######################## need to modify
-                        if False:  ### Need somthing like bundle_round to be a boolean veriable or if n_round < x ...
+                    #Goal: 
+                    # 0) Decide if bundles should be auctioned off or individual offers
+                    # Determine Bundle ID if bundle
+                    # 1) Create list of bundles to auction off
+                    # 2) Put this list to auction
+                    # offer_id = str(uuid.uuid4()) -> bundle ID
+
+
+
+                    #TODO: Find another iterator (maybe iterate through auctions on sale?! or size of Bundle round?!)
+                    
+
+                    if n_round < BUNDLE_ROUNDS: #bundle round
+                        for current_bundle in range(len(self.bundles)): # iterating through bundle list
+                            
+                            #Set bundles on offer
                             for offer in self.offers:
-                                if offer.offer_id in self.bundles[self.id_on_auction]:
+                                if offer.offer_id in self.bundles[current_bundle]:
                                     offer.on_auction = True
-                        else:
-                            self.offers[i].on_auction = True
-                            self.id_on_auction = self.offers[i].offer_id
-                        #########################
-                             
-    
-                        self.phase = "REQ_OFFER"
-                        print("\nEntering offer request phase")
-                        self.auction_time = int(time.time()) + BASE_TIMEOUT
-                        self._wait_until(self.auction_time)
+                            
+                            # Set Auction ID to first offer of bundle (eg. "bundle_firstofferid")
+                            self.id_on_auction = "bundle_" + str(self.bundles[current_bundle][0]) # FIXME: ACCESS first element of bundle
 
-                        self.phase = "BID"
-                        print("\nEntering bidding phase")
-                        self.auction_time = int(time.time()) + BASE_TIMEOUT
-                        self._wait_until(self.auction_time)
+                            self.phase = "REQ_OFFER"
+                            print("\nEntering offer request phase")
+                            self.auction_time = int(time.time()) + BASE_TIMEOUT
+                            self._wait_until(self.auction_time)
 
-                        self.phase = "RESULTS"
-                        self.offers[i].update_results()
-                        print("\nEntering results phase")
-                        self.auction_time = int(time.time()) + BASE_TIMEOUT
-                        self._wait_until(self.auction_time)
-                        self.check_active_carriers()
+                            self.phase = "BID"
+                            print("\nEntering bidding phase")
+                            self.auction_time = int(time.time()) + BASE_TIMEOUT
+                            self._wait_until(self.auction_time)
 
-                        self.phase = "CONFIRM"
-                        print("\nEntering confirmation phase")
-                        self.auction_time = int(time.time()) + BASE_TIMEOUT 
-                        if self.offers[i].winner != "NONE":
-                            sold += 1
-                        if i == len(self.offers)-1:
-                            # last offer in the leaset on auction
-                            if not sold and not self.valide_bids_for_unsold_offer():
-                                # no offer was sold and no offer has valide bids
-                                self.next_round = False                 
-                        self._wait_until(self.auction_time)
-                        self.offers[i].on_auction = False
+                            self.phase = "RESULTS"
+                            print("\nEntering results phase")
+                            # Update Multi Offer
+                            for offer in self.offers:
+                                if offer.offer_id in self.bundles[current_bundle]:
+                                    offer.update_results()
+                            self.auction_time = int(time.time()) + BASE_TIMEOUT
+                            self._wait_until(self.auction_time)
+                            self.check_active_carriers()
+
+                            self.phase = "CONFIRM"
+                            print("\nEntering confirmation phase")
+                            self.auction_time = int(time.time()) + BASE_TIMEOUT 
+                            # Stats for Multi Offer
+                            for offer in self.offers:
+                                if offer.offer_id in self.bundles[current_bundle] and offer.winner != "NONE":
+                                    sold += 1
+
+                            #FIXME: later, because I am not sure if this is relevant at this point (maybe if there are only bundles)
+                            if False and i == len(self.offers)-1:
+                                # last offer in the leaset on auction
+                                if not sold and not self.valide_bids_for_unsold_offer():
+                                    # no offer was sold and no offer has valide bids
+                                    self.next_round = False                 
+                            self._wait_until(self.auction_time)
+                            # Set Multiple Offers to on_auction = False
+                            for offer in self.offers:
+                                if offer.offer_id in self.bundles[current_bundle]:
+                                    offer.on_auction = False
+
+                    else: #single offer Round
+                        for i in range(len(self.offers)): # iterating auction list print(f"\nOffer {i+1}/{len(self.offers)} on sale\n")
+
+                            ######################## need to modify
+                            if False:  ### Need somthing like bundle_round to be a boolean veriable or if n_round < x ...
+                                for offer in self.offers:
+                                    if offer.offer_id in self.bundles[self.id_on_auction]:
+                                        offer.on_auction = True
+                            else:
+                                self.offers[i].on_auction = True
+                                self.id_on_auction = self.offers[i].offer_id
+                            #########################
+                                
+        
+                            self.phase = "REQ_OFFER"
+                            print("\nEntering offer request phase")
+                            self.auction_time = int(time.time()) + BASE_TIMEOUT
+                            self._wait_until(self.auction_time)
+
+                            self.phase = "BID"
+                            print("\nEntering bidding phase")
+                            self.auction_time = int(time.time()) + BASE_TIMEOUT
+                            self._wait_until(self.auction_time)
+
+                            self.phase = "RESULTS"
+                            self.offers[i].update_results()
+                            print("\nEntering results phase")
+                            self.auction_time = int(time.time()) + BASE_TIMEOUT
+                            self._wait_until(self.auction_time)
+                            self.check_active_carriers()
+
+                            self.phase = "CONFIRM"
+                            print("\nEntering confirmation phase")
+                            self.auction_time = int(time.time()) + BASE_TIMEOUT 
+                            if self.offers[i].winner != "NONE":
+                                sold += 1
+                            if i == len(self.offers)-1:
+                                # last offer in the leaset on auction
+                                if not sold and not self.valide_bids_for_unsold_offer():
+                                    # no offer was sold and no offer has valide bids
+                                    self.next_round = False                 
+                            self._wait_until(self.auction_time)
+                            self.offers[i].on_auction = False
 
                     self.update_auction_list() 
                     if not self.next_round:
@@ -165,3 +230,35 @@ class Auctioneer:
         return any(bid_is_legal)
         # in at least one offer that has not been sold there is at least one bid which is legal
         #legal = [bid > offer.profit for bid in offer.bids.values() for offer in self.offers]
+
+        ############################################################
+        # Calculate single share and return this value according to:
+        # share = (single_revenue / all_cost) * bid
+        # P = bid, all_cost = total rev of all included routes in bundle, a = revenue
+        # also check if bid < all_cost -> not ensured at the moment
+        # only bid can be negative -> no problem, because it is under threshold
+        ############################################################
+    def calculate_share(self, bundle_id, single_offer_id, bid):
+        print("Begin func: calculate_share()")
+        first_offer_in_bundle = bundle_id.replace("bundle_", "")
+        bundle_key = utils.get_key_from_bundle_by_first_element(self.bundles, first_offer_in_bundle)
+        print("bundle_key")
+        print(bundle_key)
+
+        # Calculate all_cost and get revenue for single_offer_id
+        all_cost = 0
+        single_revenue = 0
+        for offer in self.offers:
+            if offer.offer_id in self.bundles[bundle_key]:
+                all_cost += offer.revenue
+                
+                if offer.offer_id == single_offer_id:
+                    single_revenue = offer.revenue 
+        
+        print(f"single_revenue: {single_revenue}; all_cost: {all_cost}; bid: {bid}")
+
+        share = (single_revenue / all_cost) * bid
+        print("share:")
+        print(share)
+
+        return share

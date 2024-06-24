@@ -88,11 +88,10 @@ class Carrier:
             auction_time = response["timeout"]
             self._wait_until(auction_time+2)  # Wait to auction time
 
-            # perform request auction results
+            # perform request auction results: Receives list of single offers; bundles no longer needed
             response = self.request_handler.request_auction_results()  # Request auction results
             print("\n Auctioneer response to request_results:")
             print(json.dumps(response, indent=2, default=str))
-
             auction_time = response["timeout"]
             self._wait_until(auction_time+2)  # Wait to auction time
 
@@ -101,8 +100,13 @@ class Carrier:
             print("\n Auctioneer response to confirm_results:")
             print(json.dumps(response, indent=2, default=str))
 
-            offer = response["payload"]["offer"]
-            self.update_offer_list(offer) # Save the relevant results (offer sold/ winning bid)
+            # Response is now list of offers
+            # payload: [offer1, offer2, ...]
+
+            received_offers = response["payload"]["offers"]
+
+            for received_offer in received_offers:
+                self.update_offer_list(received_offer)
             
             if not response["payload"]["next_round"]:
 

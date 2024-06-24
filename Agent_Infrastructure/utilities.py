@@ -81,3 +81,9 @@ def dict_to_float(dict):
     for k, v in dict.items():
         dict[k] = float(v)
     return dict
+
+def get_key_from_bundle_by_first_element(dictionary, value):
+    for key, val in dictionary.items():
+        if val[0] == value:
+            return key
+    return None
