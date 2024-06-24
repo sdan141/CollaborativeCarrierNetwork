@@ -204,7 +204,7 @@ class Auctioneer:
                     if offer.on_auction and (register==offer.winner or register==offer.carrier_id):
                         offer.winner = 'NONE'
                         offer.winning_bid = 'NONE'
-                        if all([bid < offer.min_price for bid in offer.bids.values()]):
+                        if all([bid < offer.profit for bid in offer.bids.values()]):
                             offer.bids = {}
         self.registered_carriers = self.active_carriers
 
