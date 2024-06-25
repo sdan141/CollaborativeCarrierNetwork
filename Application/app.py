@@ -109,11 +109,11 @@ def init_auctioneer():
 @app.route('/init_carrier', methods=['POST'])
 def init_carrier():
     company_name = request.json.get('companyName')
-    locations = request.json.get('locations')
-    profit_list = request.json.get('profitList')
+    # locations = request.json.get('locations')
+    # profit_list = request.json.get('profitList')
     carrier = Carrier(company_name, socketio, config_file=None, deliveries_file=None)
     carrier.start()
-
+"""
 @socketio.on('connect')
 def handle_connect():
     user_id = 'test_id' # str(uuid.uuid4())
@@ -126,6 +126,7 @@ def handle_disconnect():
     user_id = session.get('user_id')
     if user_id:
         leave_room(user_id)
+"""
 
 @socketio.on('start_expensive_task')
 def handle_start_expensive_task(data):

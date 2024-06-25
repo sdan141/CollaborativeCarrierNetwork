@@ -73,20 +73,6 @@ function checkInputError() {
         return false;
     }
 
-    // Check for min value out of range
-    if(document.getElementById("minVal").value === "")
-    {
-        errorMessage.textContent = "Min value out of bounds.";
-        return false;
-    }
-
-    // Check for max value out of range
-    if(document.getElementById("maxVal").value === "")
-    {
-        errorMessage.textContent = "Max value out of bounds.";
-        return false;
-    }
-
     // Check if deliveries are added
     if(!deliveriesAdded)
     {
@@ -94,7 +80,7 @@ function checkInputError() {
         return false;
     }
 
-    errorMessage.style.display = "none";
+    errorMessage.textContent = "";
     return true;
 }
 
@@ -104,21 +90,18 @@ function registerAuction() {
         return;
     }
 
-    chat = document.getElementById("carrierChat");
     regButton = document.getElementById("registerButton");
-    settings = document.getElementById("settings");
+    blkBackground = document.getElementById("chatBlkBackground");
     companyTitle = document.getElementById("companyTitle");
-    companyName = document.getElementById("companyName").value
+    companyName = document.getElementById("companyName");
 
-    companyTitle.textContent = companyName;
+    companyTitle.textContent = companyName.value;
+    companyName.style.display = "none";
+    blkBackground.style.display = "none";
     companyTitle.style.display = "block";
-    minVal = document.getElementById("minVal").value;
-    maxVal = document.getElementById("maxVal").value;
-    settings.style.display = "none";
     regButton.style.display = "none";
-    chat.style.display = "flex";
 
-    initCarrier(companyName);
+    initCarrier(companyName.value);
 }
 
 function showActionDisplay() {
@@ -129,6 +112,30 @@ function showActionDisplay() {
 function closeActionDisplay() {
     document.getElementById("actionDisplay").style.display = "none";
     document.getElementById("actionDarkBG").style.display = "none";
+}
+
+function initCarrier(companyName) {
+    const socket = io();
+
+    socket.on('connect', () => {
+        
+        socket.on(companyName, (data) => {
+            // sendMessage(data.message, "green");
+            sendConsole(data.message, companyName, "green");
+        });
+
+        socket.on("carrier_error", (data) => {
+            // sendMessage(data.message, "red");
+        });
+
+        fetch('/init_carrier', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ companyName: companyName }) // , locations: locations, profitList: profitList })
+        })
+    });
 }
 
 function getTime() {
@@ -169,6 +176,7 @@ function sendMessage(input, color) {
 function startServer() {
     document.getElementById("auctioneerChat").style.display = "flex";
     document.getElementById("serverButton").style.display = "none";
+    document.getElementById("auctionBlkBackground").style.display = "none";
 
     initAuctioneer();
 }
@@ -178,11 +186,12 @@ function initAuctioneer() {
 
     socket.on('connect', () => {
         socket.on('auctioneer_log', (data) => {
-            sendMessage(data.message, "green");
+            // sendMessage(data.message, "green");
+            sendConsole(data.message, "auctioneerSim", "green");
         });
 
         socket.on('auctioneer_offers', (data) => {
-            sendMessage(data.message, "red");
+            // sendMessage(data.message, "red");
         });
 
         fetch('/init_auctioneer', {
@@ -191,30 +200,6 @@ function initAuctioneer() {
         
     });
 } 
-
-function initCarrier(companyName) {
-    const socket = io();
-
-    socket.on('connect', () => {
-        
-        socket.on("carrier_log", (data) => {
-            sendMessage(data.message, "green");
-        });
-
-        socket.on("carrier_error", (data) => {
-            sendMessage(data.message, "red");
-        });
-
-        fetch('/init_carrier', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ companyName: companyName, locations: locations, profitList: profitList })
-        })
-    });
-}
-
 
 function createAuction(input) {
     var chatLog = document.getElementById('auctionLog');
@@ -325,3 +310,104 @@ function biddingAuction(input) {
 
     // chatLog.scrollTop = chatLog.scrollHeight; 
 }
+
+function sendConsole(input, agentID, color) {
+    var console = document.getElementById(agentID);
+
+    var message = document.createElement('p');
+    message.classList.add('message', 'sent');
+
+    if(color == "green") {
+        message.style.backgroundColor = "#e1ffc7";
+    }
+
+    if(color == "red") {
+        message.style.backgroundColor = "#ffdbc7";
+    }
+    
+    var messageText = document.createElement('p');
+    messageText.textContent = `(${getTime()}) ${input}`;
+
+    message.appendChild(messageText);
+    console.appendChild(message);
+
+    console.scrollTop = console.scrollHeight; 
+}
+
+function startSimulation() {
+    let carrierAmount = parseInt(document.getElementById("carrierAmount").value);
+
+    let simulButton = document.getElementById("simulButton");
+    simulButton.style.backgroundColor = "gray";
+    simulButton.textContent = "Simulating...";
+
+    let consoleContainer = document.getElementById("consoleContainer");
+    consoleContainer.innerHTML = ''; // Clear previous contents
+
+    let totalConsoles = carrierAmount + 1; // Total consoles to instantiate
+    let consoleRow;
+
+    for (let i = 0; i < totalConsoles; i++) {
+        // Create a new row for every two consoles
+        if (i % 2 === 0) {
+            consoleRow = document.createElement('div');
+            consoleRow.classList.add('consoleRow');
+        }
+
+        var consolet = document.createElement('div');
+        var consoleTitle = document.createElement('div');
+        var consoleChat = document.createElement('div');
+
+        if (i === 0) {
+            consolet.classList.add('consoles');
+            consoleTitle.classList.add('consoleTitle');
+            consoleTitle.textContent = `Auctioneer`;
+            consoleChat.id = "auctioneerSim";
+            consoleChat.classList.add('consoleChat');
+        } else {
+            consolet.classList.add('consoles');
+            consoleTitle.classList.add('carrierConsoleTitle');
+            consoleTitle.textContent = `Carrier ${i}`;
+            consoleChat.id = `Carrier ${i}`;
+            consoleChat.classList.add('consoleChat');
+        } 
+
+        consolet.appendChild(consoleTitle);
+        consolet.appendChild(consoleChat);
+        consoleRow.appendChild(consolet);
+
+        // Add empty console if odd amount of carriers
+        if (i === totalConsoles - 1 && totalConsoles % 2 === 1) {
+            var consolet = document.createElement('div');
+            var consoleTitle = document.createElement('div');
+            var consoleChat = document.createElement('div');
+            consolet.classList.add('consoles'); // Different class for the extra console
+            consoleTitle.classList.add('consoleTitle'); // Different class for the title
+            consoleTitle.textContent = `Extra`;
+            consoleChat.classList.add('consoleChat'); // Different class for the chat
+            consolet.appendChild(consoleTitle);
+            consolet.appendChild(consoleChat);
+            consoleRow.appendChild(consolet);
+        }
+
+        // Append the row to the container when it's full 
+        if (i % 2 === 1 || (i === totalConsoles - 1)) {
+            consoleContainer.appendChild(consoleRow);
+        }
+
+        
+    }
+
+    // initAuctioneer();
+
+    startCarriers(totalConsoles);
+}
+
+function startCarriers(totalConsoles) {
+    for (let i = 1; i < totalConsoles; i++) {
+        setTimeout(() => {
+            initCarrier(`Carrier ${i}`);
+        }, i * 1000); // 1000 milliseconds delay between each initialization
+    }
+}
+

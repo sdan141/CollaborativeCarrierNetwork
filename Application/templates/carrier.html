@@ -10,6 +10,42 @@
     </div>
     <input type="file" id="file" accept=".xlsx, .xls" style="display: block; height: 50px; font-size: 1.5em; margin-top: 20px;">
     <div class="buttonStyle" id="uploadButton" onclick="uploadDeliveries()">Upload</div>
+    <div id="settings">
+        <p class="valueText" id="maxVal">
+            Sell request below: 
+            <input type="number" id="numberInput" min="0" max="100" value="50" oninput="updateSlider(this.value)" class="valueInput">
+        </p>
+        
+        <p class="valueText" id="minVal">
+            Buy for minimum profit: 
+            <input type="number" id="numberInput" min="0" max="100" value="50" oninput="updateSlider(this.value)" class="valueInput">
+        </p>
+
+        <p class="valueText" id="minVal">
+            Buy for minimum profit: 
+            <input type="number" id="numberInput" min="0" max="100" value="50" oninput="updateSlider(this.value)" class="valueInput">
+        </p>
+
+        <p class="valueText" id="minVal">
+            Base Price: 
+            <input type="number" id="numberInput" min="0" max="100" value="20" oninput="updateSlider(this.value)" class="valueInput">
+        </p>
+
+        <p class="valueText" id="minVal">
+            Loading Rate: 
+            <input type="number" id="numberInput" min="0" max="100" value="10" oninput="updateSlider(this.value)" class="valueInput">
+        </p>
+
+        <p class="valueText" id="minVal">
+            Kilometer Price: 
+            <input type="number" id="numberInput" min="0" max="100" value="2" oninput="updateSlider(this.value)" class="valueInput">
+        </p>
+
+        <p class="valueText" id="minVal">
+            Kilometer Cost: 
+            <input type="number" id="numberInput" min="0" max="100" value="1" oninput="updateSlider(this.value)" class="valueInput">
+        </p>
+    </div>
     <div class="buttonStyle" id="generateButton" onclick="generateDeliveries()">Generate</div>
 </div>
 <div class="tBlackBG" id="actionDarkBG" onclick="closeActionDisplay()"></div> 
@@ -20,30 +56,21 @@
     
         <div id="chatContainer">
             
+            <input class="companyName" placeholder="Company Name" id="companyName">
+        
             <div class="companyName" id="companyTitle">Company Name</div> 
             
-            <div id="settings">
-                <input class="companyName" placeholder="Company Name" id="companyName">
-                <p class="valueText" id="maxVal">
-                    Sell request below: 
-                    <input type="number" id="numberInput" min="0" max="100" value="50" oninput="updateSlider(this.value)" class="valueInput">
-                </p>
-                
-                <p class="valueText" id="minVal">
-                    Buy for minimum profit: 
-                    <input type="number" id="numberInput" min="0" max="100" value="50" oninput="updateSlider(this.value)" class="valueInput">
-                </p>
-            </div>
-
+            <div id="errorMessage"></div>
+            
             <div id="carrierChat">
                 <div class="chat-log" id="chatLog">
                     <!-- Messages will be dynamically added here -->
-                </div>
+                </div> 
+                
+                <button class="buttonStyle" onclick="registerAuction()" id="registerButton">Register for auction</button>
+                <div class="tBlackBG" id="chatBlkBackground"></div> 
             </div>
-
-            <div id="errorMessage"></div>
-
-            <button class="buttonStyle" onclick="registerAuction()" id="registerButton">Register for auction</button>
+    
         </div>
 
 
@@ -64,8 +91,10 @@
     
     </div>
 
-    <div id="guiButton" onclick=""></div>
-    <!-- <div id="guiButton" onclick="sendMessage('Test')">Settings</div> -->
+    <div class="guiButtonContainer">
+        <!-- <div class="guiButtons" onclick="">Settings</div> -->
+        <div class="guiButtons" onclick="">Tour</div>
+    </div>
 
 </section>
 

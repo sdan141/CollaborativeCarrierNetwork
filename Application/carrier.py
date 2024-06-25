@@ -16,7 +16,7 @@ class Carrier:
         self.server_port = server_port
         self.socketio = socketio
         print(f"Carrier agent {carrier_id} is ready")
-        self.socketio.emit("carrier_log", {'message': f"Carrier agent {carrier_id} is ready"}, room='test_id')
+        self.socketio.emit(carrier_id, {'message': f"Carrier agent {carrier_id} is ready"})
         #self.config_file = config_file
         self.cost_model = CostModel(config_file)
         self.routing = Routing(deliveries_file)
@@ -27,12 +27,12 @@ class Carrier:
         #print(json.dumps(response, indent=2, default=str))
         if not response or 'payload' not in response or response['payload']['status'] != 'OK':
             print("Registration failed:", response)
-            self.socketio.emit("carrier_error", {'message': "Registration failed"}, room='test_id')
+            self.socketio.emit(self.carrier_id, {'message': f"Registration failed: {response}"})
             exit()
 
         if response['payload']['status'] != 'OK':
             print(response['payload']['status'])
-            # self.socketio.emit("carrier_error", {'message': "Registration failed"}, room='test_id')
+            self.socketio.emit(self.carrier_id, {'message': f"{response['payload']['status']}"})
             exit()
         
         self.handle_requests(response)
@@ -50,7 +50,7 @@ class Carrier:
         while True:
             response = self.request_offer() # Request current offers
             print("\n Auctioneer response to request_offers:")
-            self.socketio.emit("carrier_log", {'message': "Auctioneer response to request_offers:"}, room='test_id')
+            self.socketio.emit(self.carrier_id, {'message': "Auctioneer response to request_offers:"})
             print(json.dumps(response, indent=2, default=str))
 
             offer = response["payload"]["offer"]
@@ -105,6 +105,7 @@ class Carrier:
             carrier_socket.connect((self.server_host, self.server_port))
         except ConnectionRefusedError as e:
             print(f"Error connecting to Auctioneer server: {e}")
+            self.socketio.emit(self.carrier_id, {'message': f"Error connecting to Auctioneer server: {e}"})
             return None
         return carrier_socket
 

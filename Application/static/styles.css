@@ -87,6 +87,11 @@ body {
     gap: 20px;
 }
 
+
+#companyTitle {
+    display: none;
+}
+
 #contentContainer {
     display: flex;
     justify-content: center;
@@ -94,23 +99,24 @@ body {
     width: 90%;
 }
 
-.companyName {
-    font-size: 4em;
-    padding: 10px;
-    width: 100%;
-}
-
-#companyTitle {
-    display: none;
-}
-
 #chatContainer {
     width: 40%;
+    height: 600px;
+}
+
+.companyName {
+    font-size: 4em;
+    width: 100%;
+    height: 75px;
+}
+
+#guiContainer {
+    width: 60%;
     height: 100%;
 }
 
 .valueText {
-    font-size: 2em;
+    font-size: 1.5em;
 }
 
 .valueInput {
@@ -121,26 +127,21 @@ body {
 }
 
 #errorMessage {
-    height: 20px;
+    height: 25px;
     font-size: 1em;
     padding: 10px;
     color: red;
 }
 
-#registerButton {
-    left: 30%;
-}
-
-
 #carrierChat {
-    margin-top: 25px;
     width: 100%;
-    height: 500px;
+    height: 450px;
     background-color: white;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
-    display: none;
+    display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .chat-log {
@@ -176,22 +177,20 @@ body {
 
 
 
-
-#guiContainer {
-    width: 60%;
-    height: 100%;
-}
-
 #gui {
     width: 100%;
     height: 600px;
     position: relative;
+    
 }
 
 #frameGUI {
     width: 100%;
     height: 100%;
     display: none;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    
 }
 
 #guiTitle {
@@ -217,6 +216,23 @@ body {
     z-index: 3;
 }
 
+#registerButton {
+    top: 50%;     
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    z-index: 3;
+}
+
+#serverButton {
+    top: 50%;     
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    z-index: 3;
+}
+
+
 .tBlackBG {
     opacity: 0.3;
     background-color: black;
@@ -226,21 +242,28 @@ body {
     top: 0;
     left: 0;
     z-index: 2;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
 }
 
-#guiButton { 
+.guiButtonContainer { 
+    width: 75px;
+    height: auto;
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+}
+
+.guiButtons {
+    background-color: gray;
     height: 75px;
     width: 75px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 5px;
-    color: white;
-    background-color: gray;
-    background-image: url('phone.png'); /* https://www.flaticon.com/free-icon/phone_13907361?term=swap&page=1&position=7&origin=tag&related_id=13907361 */
-    background-repeat: no-repeat;
-    background-size: cover; 
-    cursor: pointer;
 }
 
 #guiBottomText {
@@ -335,8 +358,9 @@ body {
     background-color: white;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
-    display: none;
+    display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 #auctionChat {
@@ -388,14 +412,38 @@ body {
 #simulationContent {
     height: auto;
     position: absolute;
-    margin-top: 150px;
+    margin-top: 125px;
     margin-left: 5%;
     width: 90%;
+    overflow: hidden;
 }
 
 .simulationSettings {
     width: 100%;
-    background-color: rebeccapurple;
+    background-color: rgb(194, 194, 194);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 25px;
+    border-radius: 5px;
+    gap: 20px;
+    justify-content: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.simulationText {
+    font-size: 2em;
+}
+
+.simulationInput {
+    font-size: 2em;
+    width: 75px;
+    text-align: center;
+}
+
+#simulButton {
+   
 }
 
 #consoleContainer {
@@ -418,6 +466,19 @@ body {
     border-radius: 5px;
     overflow: hidden;
 }
+
+
+.emptyConsole  {
+    height: 100%;
+    width: 100%;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    box-sizing: border-box;
+    background-color: aqua;
+}
+
 
 .consoleTitle {
     width: 100%;
