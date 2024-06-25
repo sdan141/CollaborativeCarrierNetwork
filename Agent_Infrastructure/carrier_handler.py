@@ -234,7 +234,7 @@ class CarrierHandler(threading.Thread):
             # send results
             payload = {
                 "status": "OK",
-                "offers": [ob.__dict__ for ob in offers_on_auction],
+                "offers": [ob.to_dict() for ob in offers_on_auction],
                 "next_round": self.auctioneer.next_round
             }
             return payload
