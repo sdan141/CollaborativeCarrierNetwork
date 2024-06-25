@@ -44,7 +44,6 @@ class Carrier:
         return offer_id, bid
     
     def update_offer_list(self, offer):
-        print(f"\noffer: {offer}\n")
         if offer['offeror']==self.carrier_id or offer['winner']==self.carrier_id:
             self.routing.update_offer_list(offer)
 
