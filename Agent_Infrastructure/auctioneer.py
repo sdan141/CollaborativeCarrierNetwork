@@ -64,7 +64,8 @@ class Auctioneer:
                     
                     sold = 0 # for counting how many offers have been sold in the round
                     
-                    if not n_round:
+                    if n_round == 0:
+                        # This is the 1.st round
                         self._wait_until(self.auction_time)
                         self.generate_bundles()
                         print(f'\nBundles: {self.bundles}\n')
@@ -78,11 +79,8 @@ class Auctioneer:
                     # 2) Put this list to auction
                     # offer_id = str(uuid.uuid4()) -> bundle ID
 
-
-
                     #TODO: Find another iterator (maybe iterate through auctions on sale?! or size of Bundle round?!)
                     
-
                     if n_round < BUNDLE_ROUNDS: #bundle round
                         for current_bundle in range(len(self.bundles)): # iterating through bundle list
                             
@@ -93,7 +91,7 @@ class Auctioneer:
                             
                             # Set Auction ID to first offer of bundle (eg. "bundle_firstofferid")
                             self.id_on_auction = "bundle_" + str(self.bundles[current_bundle][0]) # FIXME: ACCESS first element of bundle
-
+                                                                                                  # (Shachar:) ???
                             self.phase = "REQ_OFFER"
                             print("\nEntering offer request phase")
                             self.auction_time = int(time.time()) + BASE_TIMEOUT

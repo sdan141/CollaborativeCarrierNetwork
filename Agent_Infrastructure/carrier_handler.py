@@ -192,19 +192,20 @@ class CarrierHandler(threading.Thread):
         if self.auctioneer.phase != "RESULTS":
             return {"status": "NO_RESULTS_PHASE"}
         
+        self.auctioneer.active_carriers.append(carrier_id)
         results_available = 0
         offers_on_auction = []
 
         for offer in self.auctioneer.offers:
             if offer.on_auction:
                 offers_on_auction.append(offer)
-                results_available = 1
+                results_available = True
 
         if results_available:
             # send results
             payload = {
                 "status": "OK",
-                "offers": [ob.__dict__ for ob in offers_on_auction]
+                "offers": [ob.to_dict() for ob in offers_on_auction]
             }
             return payload
 
