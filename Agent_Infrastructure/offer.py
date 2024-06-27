@@ -37,7 +37,7 @@ class Auction:
 
 class Offer:
 
-    def __init__(self, carrier_id, offer_id, loc_pickup, loc_dropoff, profit=None, revenue=None, cost=None):
+    def __init__(self, carrier_id, offer_id, loc_pickup, loc_dropoff, profit=None, revenue=None, cost=None, winning_bid="NONE", winner="NONE"):
         self.carrier_id = carrier_id    
         self.offer_id = offer_id # [offer_id]        
         self.loc_pickup = loc_pickup # [(x,y)] dict {x_pos:, y_pos:} => {x_pos:[..], ..}
@@ -47,8 +47,8 @@ class Offer:
         self.cost = cost
         self.bids = {}     
         self.on_auction = False     
-        self.winner = "NONE"      
-        self.winning_bid = "NONE"         
+        self.winner = winner     
+        self.winning_bid = winning_bid        
 
     def add_bid(self, bidder ,bid):
         self.bids[bidder] = bid

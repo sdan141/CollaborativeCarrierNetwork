@@ -8,7 +8,7 @@ class CostModel:
 
         if not config_file:
             cost_model = utils.random_cost_model()
-            self.threshold = random.randrange(100,200)
+            self.threshold = random.randrange(500,550)
         else: 
             with open(config_file, 'rb') as stream:
                 try:
@@ -24,15 +24,15 @@ class CostModel:
         self.b2 = cost_model['b2']
 
     def get_mariginal_revenue(self, loc_pickup, loc_dropoff):
-        margin_revenue = self.a1 + self.a2*utils.get_distance(loc_pickup, loc_dropoff)
+        margin_revenue = self.a1 + self.a2*utils.get_distance(loc_pickup, loc_dropoff, mode='manhattan')
         return margin_revenue
     
     def get_total_revenue(self):
         pass
 
 
-    def get_marginal_cost(self, marginal_distance):
-        margin_cost = self.b1 + self.b2*marginal_distance
+    def get_marginal_cost(self, marginal_distance, n_jobs=1):
+        margin_cost = n_jobs * self.b1 + self.b2*marginal_distance
         return margin_cost
 
     def get_total_cost(self):

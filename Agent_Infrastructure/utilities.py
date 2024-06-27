@@ -11,7 +11,7 @@ def read_transport_requests(file_path): # path?
     return deliveries_df 
 
 def generate_random_locations(): 
-    deliveries = np.random.uniform((-100,-100,-100,-100),(100,100,100,100),(5,4))
+    deliveries = np.random.uniform((-100,-100,-100,-100),(100,100,100,100),(10,4))
     deliveries_df = pd.DataFrame(deliveries,columns=['pickup_long','pickup_lat','delivery_long','delivery_lat'])
     print(f"\nAll deliveries: \n")
     print(tabulate(deliveries_df, headers='keys', tablefmt='psql'))
@@ -48,18 +48,18 @@ def get_requests_below_thresh(df ,thresh=100):
     print(f"\n\nTransport request to send: \n{requests_list}\n")
     return requests_list
 
-def get_distance(loc_pickup, loc_dropoff, mode="euclid"):
-    pickup_point = (loc_pickup["pos_x"], loc_pickup["pos_y"])
-    dropoff_point = (loc_dropoff["pos_x"], loc_dropoff["pos_y"])
+def get_distance(p0, p1, mode="euclid"):
+    p_0 = (p0["pos_x"], p0["pos_y"])
+    p_1 = (p1["pos_x"], p1["pos_y"])
     if mode=="euclid":
-        distance = np.linalg.norm(np.array(pickup_point) - np.array(dropoff_point))
+        distance = np.linalg.norm(np.array(p_0) - np.array(p_1))
     elif mode=="manhattan":
-        distance = np.sum(np.abs(np.array(pickup_point) - np.array(dropoff_point)))
+        distance = np.sum(np.abs(np.array(p_0) - np.array(p_1)))
     return distance
     
 
 def random_cost_model():
-    costs = np.random.uniform((256,32,8,4),(512,64,16,8),4)
+    costs = np.random.uniform((512,32,3,2),(1024,64,6,3),4)
     print(f"\nCarrier random cost model:\n a_1 = {round(costs[0],2)}, a_2 = {round(costs[1],2)}, \
                                            b_1 = {round(costs[2],2)}, b_2 = {round(costs[3],2)}\n")
     return {'a1': costs[0], 'a2': costs[1], 'b1': costs[2], 'b2': costs[3]}
@@ -87,3 +87,8 @@ def get_key_from_bundle_by_first_element(dictionary, value):
         if val[0] == value:
             return key
     return None
+
+def print_offer_list(offer_dictionaries):
+    offers = [flatten_and_round_dict(offer) for offer in offer_dictionaries]
+    offers_df = pd.DataFrame(offers).drop(columns=['offer_id'])
+    print(tabulate(offers_df, headers='keys', tablefmt='psql'))

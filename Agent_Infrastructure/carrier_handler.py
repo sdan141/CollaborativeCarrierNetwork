@@ -47,7 +47,7 @@ class CarrierHandler(threading.Thread):
 
     def send_response(action):
         """
-        Decorator to construct and send a JSON response for the carrier.
+        Decorator to construct and send a JSON response to the carrier.
         """
         def func_decorator(func):
             def decorator(self, data):
@@ -109,12 +109,20 @@ class CarrierHandler(threading.Thread):
         elif not self.auctioneer.offers:
             return {"status": "NO_OFFERS_AVAILABLE"}
         #for offer in self.auctioneer.offers: print(f"\n on auction: {offer.on_auction}") ### CONTROLL
-        while not any([offer.on_auction for offer in self.auctioneer.offers]):
-            continue
+        # waits for auctioneer thread to update offers on auction
+        #t_1 = time.time()
+        #while not any([offer.on_auction for offer in self.auctioneer.offers]):
+        #    continue
+        #print(f"\nTime to execute while loop to wait for activated offers: {time.time()-t_1}\n")
+
         loc_pickup = []
         loc_dropoff = []
         revenue = 0 
+        '''
         for offer in self.auctioneer.offers:
+        '''
+        for i in self.auctioneer.indices_on_auction:
+            offer = self.auctioneer.offers[i]
             if offer.on_auction:
                 loc_pickup.append(offer.loc_pickup) #{'pos_x':.., 'pos_y': ...}
                 loc_dropoff.append(offer.loc_dropoff)
@@ -140,6 +148,7 @@ class CarrierHandler(threading.Thread):
 
         carrier_id = data['carrier_id']
         if self.auctioneer.phase != "BID":
+            print("Bidding timeout, current phase: ", self.auctioneer.phase)
             return {"status": "BIDDING_TIMEOUT"}
         if carrier_id not in self.auctioneer.registered_carriers:
             return {"status": "NOT_REGISTERED"}
@@ -147,7 +156,10 @@ class CarrierHandler(threading.Thread):
         offer_id = data['payload']['offer_id']
         bid = data['payload']['bid']
 
-        for offer in self.auctioneer.offers:
+        t_0 = time.time()
+        #for offer in self.auctioneer.offers:
+        for i in self.auctioneer.indices_on_auction:
+            offer = self.auctioneer.offers[i]
             #check if it is bundle
             if re.match("bundle_.*", offer_id): # Case: Bundle
 
@@ -161,16 +173,20 @@ class CarrierHandler(threading.Thread):
                     # obtain bid and distribute it to all single offers; here one case
                     bid_share = self.auctioneer.calculate_share(offer_id, offer.offer_id, bid)
                     offer.add_bid(carrier_id, bid_share)
+
                     error = 0
 
             else: # Case: No Bundle (Single Offer)
+
                 if offer.offer_id == offer_id and offer.on_auction:
+                    #print(f"\nTime to check if offer is offer is the right offer: {time.time()-t_0}\n")
+
                     offer.add_bid(carrier_id, bid)
                     error = 0
         #-- for offer in self.auctioneer.offers
 
         # Send response here
-        print("Before payload")
+        # print("Before payload")
         if not error:
             payload = {
                 "status": "OK",
@@ -196,9 +212,12 @@ class CarrierHandler(threading.Thread):
         results_available = 0
         offers_on_auction = []
 
+        '''
         for offer in self.auctioneer.offers:
             if offer.on_auction:
-                offers_on_auction.append(offer)
+        '''
+        for i in self.auctioneer.indices_on_auction:
+                offers_on_auction.append(self.auctioneer.offers[i])
                 results_available = True
 
         if results_available:
@@ -224,10 +243,12 @@ class CarrierHandler(threading.Thread):
         
         results_available = 0
         offers_on_auction = []
-
+        '''
         for offer in self.auctioneer.offers:
             if offer.on_auction:
-                offers_on_auction.append(offer)
+        '''
+        for i in self.auctioneer.indices_on_auction:
+                offers_on_auction.append(self.auctioneer.offers[i])
                 results_available = 1
 
         if results_available:

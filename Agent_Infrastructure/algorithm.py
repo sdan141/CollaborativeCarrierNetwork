@@ -1,5 +1,6 @@
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
+from google.protobuf import duration_pb2
 
 VEHICLE_MAXIMUM_DISTANCE = 5000
 NUM_VEHICLES = 1
@@ -10,6 +11,7 @@ class AlgorithmBase():
     def __init__(self, locations, assignments):
         self.locations = locations
         self.assignments = assignments
+        self.time_limit_ms = (len(assignments))*10
 
     def filter_requests_by_index(self, ignore):
         # Remove the unwanted indices from locations and create a mapping
@@ -128,6 +130,15 @@ class AlgorithmBase():
         search_parameters.first_solution_strategy = (
             routing_enums_pb2.FirstSolutionStrategy.PARALLEL_CHEAPEST_INSERTION
         )
+        
+        '''
+        TEST TO LIMIT SOLVING TIME
+        time_limit = duration_pb2.Duration()
+        time_limit.seconds = self.time_limit_ms // 1000
+        time_limit.nanos = (self.time_limit_ms % 1000) * 1000000
+        search_parameters.time_limit.CopyFrom(time_limit)
+        '''
+        search_parameters.time_limit.seconds = 1
 
         solution = routing.SolveWithParameters(search_parameters)
         optimalTour = []
@@ -155,5 +166,27 @@ class AlgorithmBase():
 
     # The main function that calles create_tour_data and calculate_optimal_tour
     def get_optimal_tour(self, ignore_indices=[], include_pickups=[], include_dropoffs=[]): 
+        '''
+        ignore_indices := int list with location indices from self.locations that should be ignored
+        include_pickups := list of tuples of pickup locations that should be included
+        include_dropoffs := list of tuples of dropoff locations that should be included
+
+        returns: the optimal tour as an index list of locations first and last index is 0 as the depot location
+                 the optimal tour distance as int
+        '''
+        #t_0 = time.time()
         data = self.create_tour_data(ignore_indices, include_pickups, include_dropoffs)
-        return self.calculate_optimal_tour(data)
+        #print(f"\nTime to create data manhattan distance: {time.time()-t_0}\n")
+
+        #t_0 = time.time()
+        optimal_tour = self.calculate_optimal_tour(data)
+        #print(f"\nTime to calculate optimal tour manhattan distance: {time.time()-t_0}\n")
+        return optimal_tour
+    
+    def update_locations_and_assignments(self, ignore_indices=[], include_pickups=[], include_dropoffs=[]):
+        if ignore_indices:
+            self.locations, self.assignments = self.filter_requests_by_index(ignore_indices)
+        if include_pickups:
+            for include_location in zip(include_pickups, include_dropoffs): # zip( [(1,2),()], [(3,4),()] ) -> [ ( (1,2), (3,4) ), () ]
+                self.locations.extend(list(include_location)) 
+                self.assignmets.append([len(self.locations)-2, len(self.locations)-1])
