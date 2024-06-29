@@ -4,21 +4,30 @@ import pandas as pd
 #from matplotlib import pyplot 
 from tabulate import tabulate
 
-def read_transport_requests(file_path): # path?
-    deliveries_df = pd.read_csv(file_path) # eventually clean data first
+def load_transport_requests(file_path): 
+    try:
+        deliveries_df = pd.read_csv(file_path) # eventually clean data first
+    except FileNotFoundError:
+        deliveries_df = generate_random_locations()
     print(f"\nAll deliveries: \n")
     print(tabulate(deliveries_df, headers='keys', tablefmt='psql'))
     return deliveries_df 
 
-def generate_random_locations(): 
-    deliveries = np.random.uniform((-100,-100,-100,-100),(100,100,100,100),(10,4))
+def generate_random_locations(n=5): 
+    #deliveries = np.random.uniform((-100,-100,-100,-100),(100,100,100,100),(10,4))
+    # New York City harbor coordinates reach
+    deliveries = np.round(np.random.uniform((81.9698,37.5281,81.9698,37.5281),(93.2898,46.2281,93.2898,46.2281),(n,4)), 3)
     deliveries_df = pd.DataFrame(deliveries,columns=['pickup_long','pickup_lat','delivery_long','delivery_lat'])
     print(f"\nAll deliveries: \n")
     print(tabulate(deliveries_df, headers='keys', tablefmt='psql'))
     return deliveries_df 
 
-def generate_random_requests(): 
-    deliveries = np.random.uniform((0,0,0,0,20,300),(1000,1000,1000,1000,200,1000),(5,6))
+def generate_random_requests(harbor='NYC', n=10): 
+    if harbor == 'NYC':
+        # New York City harbor coordinates reach
+        deliveries = np.round(np.random.uniform((81.9698,37.5281,81.9698,37.5281,100,5000),(93.2898,46.2281,93.2898,46.2281,4000,10000),(n,6)), 2)
+    else:
+        deliveries = np.random.uniform((0,0,0,0,20,300),(1000,1000,1000,1000,200,1000),(n,6))
     deliveries_df = pd.DataFrame(deliveries,columns=['pickup_long','pickup_lat','delivery_long','delivery_lat','profit', 'revenue'])
     print(f"\nAll deliveries: \n")
     print(tabulate(deliveries_df, headers='keys', tablefmt='psql'))
@@ -59,7 +68,7 @@ def get_distance(p0, p1, mode="euclid"):
     
 
 def random_cost_model():
-    costs = np.random.uniform((512,32,3,2),(1024,64,6,3),4)
+    costs = np.round(np.random.uniform((700,185,45,20),(750,215,55,25),4),2)
     print(f"\nCarrier random cost model:\n a_1 = {round(costs[0],2)}, a_2 = {round(costs[1],2)}, \
                                            b_1 = {round(costs[2],2)}, b_2 = {round(costs[3],2)}\n")
     return {'a1': costs[0], 'a2': costs[1], 'b1': costs[2], 'b2': costs[3]}
@@ -92,3 +101,18 @@ def print_offer_list(offer_dictionaries):
     offers = [flatten_and_round_dict(offer) for offer in offer_dictionaries]
     offers_df = pd.DataFrame(offers).drop(columns=['offer_id'])
     print(tabulate(offers_df, headers='keys', tablefmt='psql'))
+
+def save_results_to_csv(date, old_profit, new_profit, difference, increase):
+    try:
+        df = pd.read_csv('ccn_stats.csv')
+    except FileNotFoundError:
+        df = pd.DataFrame(columns=['date', 'old_profit', 'new_profit', 'difference', 'increase'])
+
+    new_data = {'date': date,
+              'old_profit': old_profit,
+              'new_profit': new_profit,
+              'difference': difference,
+              'increase': increase}
+    
+    df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
+    df.to_csv('ccn_stats.csv', index=False)

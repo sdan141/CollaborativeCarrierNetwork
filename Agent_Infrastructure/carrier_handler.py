@@ -108,13 +108,6 @@ class CarrierHandler(threading.Thread):
             return {"status": "NOT_REGISTERED"}
         elif not self.auctioneer.offers:
             return {"status": "NO_OFFERS_AVAILABLE"}
-        #for offer in self.auctioneer.offers: print(f"\n on auction: {offer.on_auction}") ### CONTROLL
-        # waits for auctioneer thread to update offers on auction
-        #t_1 = time.time()
-        #while not any([offer.on_auction for offer in self.auctioneer.offers]):
-        #    continue
-        #print(f"\nTime to execute while loop to wait for activated offers: {time.time()-t_1}\n")
-
         loc_pickup = []
         loc_dropoff = []
         revenue = 0 
@@ -135,8 +128,9 @@ class CarrierHandler(threading.Thread):
                 "loc_dropoff": loc_dropoff,
                 "revenue": revenue
                 }}
+        if not loc_pickup:
+            return {"status": "NO_ACTIVE_OFFERS"} 
         return payload
-        #return {"status": "NO_ACTIVE_OFFERS"}
         
 
     @send_response("bid")
@@ -155,45 +149,31 @@ class CarrierHandler(threading.Thread):
         
         offer_id = data['payload']['offer_id']
         bid = data['payload']['bid']
-
-        t_0 = time.time()
         #for offer in self.auctioneer.offers:
         for i in self.auctioneer.indices_on_auction:
             offer = self.auctioneer.offers[i]
             #check if it is bundle
             if re.match("bundle_.*", offer_id): # Case: Bundle
-
-                #Get bundle_key to access the offers in bundles
+                # Get bundle_key to access the offers in bundles
                 first_offer_in_bundle = offer_id.replace("bundle_", "")
-
                 bundle_key = utils.get_key_from_bundle_by_first_element(self.auctioneer.bundles, first_offer_in_bundle)
-
                 # Check if offer is in Bundle
                 if offer.offer_id in self.auctioneer.bundles[bundle_key]:
                     # obtain bid and distribute it to all single offers; here one case
-                    bid_share = self.auctioneer.calculate_share(offer_id, offer.offer_id, bid)
+                    bid_share = self.auctioneer.calculate_share(offer.offer_id, bid)
                     offer.add_bid(carrier_id, bid_share)
-
                     error = 0
-
             else: # Case: No Bundle (Single Offer)
-
                 if offer.offer_id == offer_id and offer.on_auction:
-                    #print(f"\nTime to check if offer is offer is the right offer: {time.time()-t_0}\n")
-
                     offer.add_bid(carrier_id, bid)
                     error = 0
-        #-- for offer in self.auctioneer.offers
-
         # Send response here
-        # print("Before payload")
         if not error:
             payload = {
                 "status": "OK",
                 "offer_id": offer_id
                 }
             return payload
-
         return {"status": "INVALID_BID"}
         
 
@@ -212,10 +192,6 @@ class CarrierHandler(threading.Thread):
         results_available = 0
         offers_on_auction = []
 
-        '''
-        for offer in self.auctioneer.offers:
-            if offer.on_auction:
-        '''
         for i in self.auctioneer.indices_on_auction:
                 offers_on_auction.append(self.auctioneer.offers[i])
                 results_available = True
@@ -227,7 +203,6 @@ class CarrierHandler(threading.Thread):
                 "offers": [ob.to_dict() for ob in offers_on_auction]
             }
             return payload
-
         return {"status": "NO_RESULTS_AVAILABLE"}
 
     @send_response("confirm")
@@ -243,10 +218,6 @@ class CarrierHandler(threading.Thread):
         
         results_available = 0
         offers_on_auction = []
-        '''
-        for offer in self.auctioneer.offers:
-            if offer.on_auction:
-        '''
         for i in self.auctioneer.indices_on_auction:
                 offers_on_auction.append(self.auctioneer.offers[i])
                 results_available = 1

@@ -7,7 +7,7 @@ class AuctioneerServer:
     """
     Class to represent the auctioneer server handling all communication.
     """
-    def __init__(self, host=socket.gethostname(), port=12351):
+    def __init__(self, host=socket.gethostname(), port=12340):
         self.host = host
         self.port = port
         self.auctioneer = Auctioneer()

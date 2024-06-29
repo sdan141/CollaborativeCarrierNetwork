@@ -11,7 +11,7 @@ class AlgorithmBase():
     def __init__(self, locations, assignments):
         self.locations = locations
         self.assignments = assignments
-        self.time_limit_ms = (len(assignments))*10
+        self.time_limit_seconds = 1
 
     def filter_requests_by_index(self, ignore):
         # Remove the unwanted indices from locations and create a mapping
@@ -130,33 +130,33 @@ class AlgorithmBase():
         search_parameters.first_solution_strategy = (
             routing_enums_pb2.FirstSolutionStrategy.PARALLEL_CHEAPEST_INSERTION
         )
-        
-        '''
-        TEST TO LIMIT SOLVING TIME
-        time_limit = duration_pb2.Duration()
-        time_limit.seconds = self.time_limit_ms // 1000
-        time_limit.nanos = (self.time_limit_ms % 1000) * 1000000
-        search_parameters.time_limit.CopyFrom(time_limit)
-        '''
-        search_parameters.time_limit.seconds = 1
+        search_parameters.time_limit.seconds = self.time_limit_seconds
 
         solution = routing.SolveWithParameters(search_parameters)
-        optimalTour = []
-        vehicle_id = 0
-        total_distance = 0
-        index = routing.Start(vehicle_id)
-        route_distance = 0
 
-        while not routing.IsEnd(index):
+        if solution:
+            optimalTour = []
+            vehicle_id = 0
+            total_distance = 0
+            index = routing.Start(vehicle_id)
+            route_distance = 0
+
+            while not routing.IsEnd(index):
+                optimalTour.append(str(manager.IndexToNode(index)))
+                previous_index = index
+                index = solution.Value(routing.NextVar(index))
+                route_distance += routing.GetArcCostForVehicle(
+                    previous_index, index, vehicle_id
+                )
+                total_distance += route_distance
             optimalTour.append(str(manager.IndexToNode(index)))
-            previous_index = index
-            index = solution.Value(routing.NextVar(index))
-            route_distance += routing.GetArcCostForVehicle(
-                previous_index, index, vehicle_id
-            )
-            total_distance += route_distance
-        optimalTour.append(str(manager.IndexToNode(index)))
 
+        else:
+            optimalTour = self.optimalTour
+
+
+        self.optimalTour = optimalTour
+        self.total_distance = total_distance
         result = {
             'optimalTour': optimalTour,
             'distance': total_distance,
@@ -174,13 +174,8 @@ class AlgorithmBase():
         returns: the optimal tour as an index list of locations first and last index is 0 as the depot location
                  the optimal tour distance as int
         '''
-        #t_0 = time.time()
         data = self.create_tour_data(ignore_indices, include_pickups, include_dropoffs)
-        #print(f"\nTime to create data manhattan distance: {time.time()-t_0}\n")
-
-        #t_0 = time.time()
         optimal_tour = self.calculate_optimal_tour(data)
-        #print(f"\nTime to calculate optimal tour manhattan distance: {time.time()-t_0}\n")
         return optimal_tour
     
     def update_locations_and_assignments(self, ignore_indices=[], include_pickups=[], include_dropoffs=[]):
