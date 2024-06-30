@@ -27,7 +27,7 @@ class Carrier:
         while time.time() < timeout:
             time.sleep(1)
 
-    def calculate_bid(self, offer, randomized=False):
+    def calculate_bid(self, offer, randomized=True):
         offer_id = offer['offer_id']
         revenue = float(offer['revenue'])
         if randomized:

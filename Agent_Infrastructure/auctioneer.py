@@ -32,9 +32,8 @@ class Auctioneer:
         self.id_on_auction = None
         self.indices_on_auction = []
     
-    def generate_bundles(self):
+    def generate_bundles(self, bundle_size=2):
         offers_sorted_indices = np.argsort([offer.revenue for offer in self.offers])
-        bundle_size = 2
         n = len(self.offers)        
         bundle_iterator = 0
 

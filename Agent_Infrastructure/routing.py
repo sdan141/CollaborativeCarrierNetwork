@@ -202,7 +202,7 @@ class Routing(AlgorithmBase):
             if offer.winner == "NONE":
                 offer.on_auction = False
         # get ALL unsold offers
-        offers_not_sold = [offer for offer in self.offers if not offer.on_auction and offer.winner=="NONE"]
+        offers_not_sold = [offer for offer in self.offers if not offer.on_auction]
         # set new locations and assignments lists
         locations, assignments = self.get_locations_and_assignments()
         self.locations, self.assignments = locations, assignments

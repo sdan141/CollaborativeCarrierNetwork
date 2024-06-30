@@ -13,7 +13,7 @@ def load_transport_requests(file_path):
     print(tabulate(deliveries_df, headers='keys', tablefmt='psql'))
     return deliveries_df 
 
-def generate_random_locations(n=5): 
+def generate_random_locations(n=7): 
     #deliveries = np.random.uniform((-100,-100,-100,-100),(100,100,100,100),(10,4))
     # New York City harbor coordinates reach
     deliveries = np.round(np.random.uniform((81.9698,37.5281,81.9698,37.5281),(93.2898,46.2281,93.2898,46.2281),(n,4)), 3)
@@ -68,7 +68,7 @@ def get_distance(p0, p1, mode="euclid"):
     
 
 def random_cost_model():
-    costs = np.round(np.random.uniform((700,185,45,20),(750,215,55,25),4),2)
+    costs = np.round(np.random.uniform((700,185,50,23),(750,215,55,28),4),2)
     print(f"\nCarrier random cost model:\n a_1 = {round(costs[0],2)}, a_2 = {round(costs[1],2)}, \
                                            b_1 = {round(costs[2],2)}, b_2 = {round(costs[3],2)}\n")
     return {'a1': costs[0], 'a2': costs[1], 'b1': costs[2], 'b2': costs[3]}

@@ -11,7 +11,7 @@ class AlgorithmBase():
     def __init__(self, locations, assignments):
         self.locations = locations
         self.assignments = assignments
-        self.time_limit_seconds = 1
+        self.time_limit_seconds = 2
 
     def filter_requests_by_index(self, ignore):
         # Remove the unwanted indices from locations and create a mapping

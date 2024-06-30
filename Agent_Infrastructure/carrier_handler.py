@@ -7,7 +7,7 @@ import utilities as utils
 import traceback #tmp
 
 
-BASE_TIMEOUT = 5
+BASE_TIMEOUT = 10
 
 class CarrierHandler(threading.Thread):
 
