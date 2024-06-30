@@ -196,7 +196,7 @@ class Routing(AlgorithmBase):
         print(f"\nBefore aution day: {old_stats}\nAfter auction day: {new_stats}\nIncrease: {increase}%\n") 
     
 
-    def update_statistics(self, save=False):
+    def update_statistics(self, save=True):
         # set unsold offer on_auction=False:
         for offer in self.offers:
             if offer.winner == "NONE":

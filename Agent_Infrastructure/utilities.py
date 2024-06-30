@@ -4,11 +4,11 @@ import pandas as pd
 #from matplotlib import pyplot 
 from tabulate import tabulate
 
-def load_transport_requests(file_path): 
+def load_transport_requests(file_path, n): 
     try:
         deliveries_df = pd.read_csv(file_path) # eventually clean data first
     except FileNotFoundError:
-        deliveries_df = generate_random_locations()
+        deliveries_df = generate_random_locations(n)
     print(f"\nAll deliveries: \n")
     print(tabulate(deliveries_df, headers='keys', tablefmt='psql'))
     return deliveries_df 

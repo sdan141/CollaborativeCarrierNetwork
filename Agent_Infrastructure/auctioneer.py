@@ -6,6 +6,7 @@ import numpy as np
 BASE_TIMEOUT = 5
 MAX_ROUNDS = 5
 BUNDLE_ROUNDS = 2
+AUCTION_MODEL = 'vickrey'
 
 class Auctioneer:
     """
@@ -101,7 +102,7 @@ class Auctioneer:
                             print("\nEntering results phase")
                             # Update Multi Offer
                             for j in self.indices_on_auction:
-                                self.offers[j].update_results()
+                                self.offers[j].update_results(mode=AUCTION_MODEL)
                             self._wait_until(self.auction_time)
                             # Check if all registered carriers are active
                             self.check_active_carriers()
@@ -162,7 +163,7 @@ class Auctioneer:
                             self._wait_until(self.auction_time)
 
                             self.phase = "RESULTS"
-                            self.offers[i].update_results()
+                            self.offers[i].update_results(mode=AUCTION_MODEL)
                             print("\nEntering results phase")
                             self.auction_time = int(time.time()) + BASE_TIMEOUT
                             self._wait_until(self.auction_time)

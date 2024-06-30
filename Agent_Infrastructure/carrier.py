@@ -114,7 +114,7 @@ class Carrier:
                 self.update_offer_list(received_offer)              
 
             if not response["payload"]["next_round"]:
-                self.print_offer_list()
+                self.print_offer_list(show_cost=True, show_profit=True)
                 self.routing.update_statistics()
                 print("\nAuction day over")
                 exit()
@@ -122,6 +122,6 @@ class Carrier:
             auction_time = response["timeout"]
             self._wait_until(auction_time+1)
 
-    def print_offer_list(self):
-        list_dict = [offer.to_dict() for offer in self.routing.offers]
+    def print_offer_list(self, show_cost=False, show_profit=False):
+        list_dict = [offer.to_dict(show_profit, show_cost) for offer in self.routing.offers]
         utils.print_offer_list(list_dict)

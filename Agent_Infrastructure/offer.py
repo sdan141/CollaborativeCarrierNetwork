@@ -23,12 +23,12 @@ class Offer:
         if not self.bids.values():
             return False 
         else:
-            bids = np.sort(self.bids.items(), key=lambda k: k[1])
-            second_highest_bid = bids[1,1]
-            winner = bids[0,0]
-            if second_highest_bid[1] <= self.profit:
+            sorted_bids = sorted(self.bids.items(), key=lambda k: k[1])
+            second_highest_bid = sorted_bids[1][1]
+            winner = sorted_bids[0][0]
+            if second_highest_bid <= self.profit:
                 return False
-            return (second_highest_bid, winner)
+            return winner, second_highest_bid
         
     def get_highest_bid(self):
         if not self.bids.values():
@@ -40,7 +40,7 @@ class Offer:
             return highest_bid
 
     def update_results(self, mode=None):
-        if mode=='vickery':
+        if mode=='vickrey':
             highest_bid = self.get_second_highest_bid()
         else:
             highest_bid = self.get_highest_bid()
@@ -52,8 +52,8 @@ class Offer:
         self.winner = winner_carrier_id
         self.winning_bid = winning_bid
 
-    def to_dict(self):
-        return {
+    def to_dict(self, show_profit=False, show_cost=False):
+        offer_dict= {
             "offeror": self.carrier_id,
             "winner": self.winner,
             "winning_bid": self.winning_bid,
@@ -62,3 +62,9 @@ class Offer:
             "loc_dropoff": self.loc_dropoff,
             "revenue": self.revenue
         }
+        if show_cost:
+            offer_dict['cost']=self.cost 
+        if show_profit:
+            offer_dict['profit']=self.profit
+
+        return offer_dict
