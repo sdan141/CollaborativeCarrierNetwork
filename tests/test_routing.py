@@ -1,9 +1,9 @@
 import unittest
 import sys
-sys.path.insert(0, '/home/shachardan/tuhh/SW-D/group09/Agent_Infrastructure')
-from routing import Routing
-from offer import Offer
-import utilities as utils
+#sys.path.insert(0, '/group09/Agent_Infrastructure')
+from Agent_Infrastructure.routing import Routing
+from Agent_Infrastructureoffer import Offer
+import Agent_Infrastructure.utilities as utils
 import numpy as np
 
 class Test_Routing(unittest.TestCase):
