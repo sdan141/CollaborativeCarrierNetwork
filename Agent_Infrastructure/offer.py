@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class Offer:
 
     def __init__(self, carrier_id, offer_id, loc_pickup, loc_dropoff, profit=None, revenue=None, cost=None, winning_bid="NONE", winner="NONE"):
@@ -16,6 +19,17 @@ class Offer:
     def add_bid(self, bidder ,bid):
         self.bids[bidder] = bid
 
+    def get_second_highest_bid(self):
+        if not self.bids.values():
+            return False 
+        else:
+            bids = np.sort(self.bids.items(), key=lambda k: k[1])
+            second_highest_bid = bids[1,1]
+            winner = bids[0,0]
+            if second_highest_bid[1] <= self.profit:
+                return False
+            return (second_highest_bid, winner)
+        
     def get_highest_bid(self):
         if not self.bids.values():
             return False 
@@ -24,9 +38,12 @@ class Offer:
             if highest_bid[1] <= self.profit:
                 return False
             return highest_bid
-    
-    def update_results(self):
-        highest_bid = self.get_highest_bid()
+
+    def update_results(self, mode=None):
+        if mode=='vickery':
+            highest_bid = self.get_second_highest_bid()
+        else:
+            highest_bid = self.get_highest_bid()
         if highest_bid:
             winner_carrier_id, winning_bid = highest_bid
         else:
