@@ -3,7 +3,13 @@ stages:
   - test
 
 before_script:
-  - pip install -r requirements.txt
+  - pip install --upgrade pip
+  - pip install -r requirements.txt --cache-dir $PYTHON_CACHE_DIR
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - $PYTHON_CACHE_DIR 
 
 build:
   stage: build
