@@ -29,23 +29,23 @@ def load_config(config_file):
 
 class Routing(AlgorithmBase):
 
-    def __init__(self, carrier_id, path_config):
+    def __init__(self, carrier_id, path_config=None, n=5):
         # load config file
         config_data = load_config(path_config) if path_config else None
         self.carrier_id = carrier_id
         self.stats = {'revenue':0, 'cost':0, 'profit':0}
         self.cost_model = CostModel(config_data)
         self.depot_location = self.set_depot_location(config_data)
-        self.offers = self.create_offer_list()
+        self.offers = self.create_offer_list(n)
         self.on_auction_indices = []
 
         locations, assignments = self.get_locations_and_assignments()
         super().__init__(locations, assignments)
 
 
-    def create_offer_list(self):
+    def create_offer_list(self, n):
         path_deliveries = "transport_requests_" + formatted_date + ".csv"
-        self.deliveries_df = utils.load_transport_requests(path_deliveries)
+        self.deliveries_df = utils.load_transport_requests(path_deliveries, n)
         offers = []
         for i, offer in self.deliveries_df.iterrows():
             offer_id = str(uuid.uuid4())
@@ -219,20 +219,19 @@ class Routing(AlgorithmBase):
                 assert offer.winner != "NONE" and offer.winner != self.carrier_id
         # calculate revenue and cost of unsold and bought offers
         for i, offer in enumerate(offers_not_sold):
+            new_stats['new_revenue'] += offer.revenue
+            
             optimal_tour_without_offer = self.get_optimal_tour(ignore_indices=[i])
             margin_distance = float(self.optimal_tour['distance']) - float(optimal_tour_without_offer['distance'])
             margin_cost = self.cost_model.get_marginal_cost(margin_distance)
-            #profit = offer.revenue - margin_cost    
-
-            new_stats['new_revenue'] += offer.revenue
             new_stats['new_cost']  += margin_cost
-            #new_stats['new_profit']  += profit
-
+           
             # add cost of buying offer if offer bought on auction
             if offer.carrier_id != self.carrier_id:
                 new_stats['new_cost'] += offer.winning_bid      
-
-            new_stats['new_profit']  = new_stats['new_revenue'] - new_stats['new_cost']  
+            offer.cost = margin_cost + (offer.winning_bid if offer.winning_bid!="NONE" else 0) 
+            offer.profit = offer.revenue - offer.cost
+        new_stats['new_profit']  = new_stats['new_revenue'] - new_stats['new_cost']  
         self.save_print_results(new_stats, save) 
 
 
