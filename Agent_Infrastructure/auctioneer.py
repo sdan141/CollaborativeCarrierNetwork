@@ -53,7 +53,7 @@ class Auctioneer:
             # if n is not even middle element has its own bundle
             bundle_iterator += 1
             self.bundles[bundle_iterator] = []
-            self.bundles[bundle_iterator].append(self.offers[offers_sorted_indices[n/2]].offer_id)
+            self.bundles[bundle_iterator].append(self.offers[offers_sorted_indices[int(n/2)]].offer_id)
 
 
         for k, v in self.bundles.items():
