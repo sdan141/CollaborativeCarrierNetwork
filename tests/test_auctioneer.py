@@ -1,9 +1,15 @@
 import unittest
 import sys
-sys.path.insert(0, '/group09/Agent_Infrastructure')
-from Agent_Infrastructure.offer import Offer
-from Agent_Infrastructure.auctioneer import Auctioneer
-import Agent_Infrastructure.utilities as utils
+#sys.path.insert(0, '/group09/Agent_Infrastructure')
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Agent_Infrastructure')))
+from offer import Offer
+from auctioneer import Auctioneer
+import utilities as utils
+
+# from Agent_Infrastructure.offer import Offer
+# from Agent_Infrastructure.auctioneer import Auctioneer
+# import Agent_Infrastructure.utilities as utils
 
 class Test_Auctioneer(unittest.TestCase):
     

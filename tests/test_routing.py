@@ -1,9 +1,14 @@
 import unittest
 import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Agent_Infrastructure')))
+from routing import Routing
+
 #sys.path.insert(0, '/group09/Agent_Infrastructure')
-from Agent_Infrastructure.routing import Routing
-from Agent_Infrastructureoffer import Offer
-import Agent_Infrastructure.utilities as utils
+#from Agent_Infrastructure.routing import Routing
+
+#from Agent_Infrastructure.offer import Offer
+#from Agent_Infrastructure import utilities as utils
 import numpy as np
 
 class Test_Routing(unittest.TestCase):
