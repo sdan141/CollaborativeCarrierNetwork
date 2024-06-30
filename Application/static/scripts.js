@@ -1,5 +1,56 @@
-var deliveriesAdded = false;
-var locations, profit_list;
+var deliveriesAdded = false; 
+var requests_file;
+
+var locations, deliveries, costList, revenueList, profit_list;
+var basePrice, loadingRate, kilometerPrice, kilometerCost;
+var priceModel;
+
+const RED = '#ffc3b3';
+const GREEN = '#e1ffc7';
+const ORANGE = '#ffd8b1';
+const GRAY = '#F3F3F3';
+
+function getTime() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const currentTime = `${hours}:${minutes}:${seconds}`;
+    return currentTime;
+}
+
+function sendMessage(input, color) {
+    var chatLog = document.getElementById('chatLog');
+    var chatInput = document.getElementById('chatInput');
+
+    var message = document.createElement('div');
+    message.classList.add('message', 'sent');
+
+    if(color == "green") {
+        message.style.backgroundColor = GREEN;
+    }
+
+    if(color == "red") {
+        message.style.backgroundColor = RED;
+    }
+
+    if(color == "orange") {
+        message.style.backgroundColor = ORANGE;
+    }
+
+    if(color == "gray") {
+        message.style.backgroundColor = GRAY;
+    }
+    
+    var messageText = document.createElement('p');
+    var formattedText = input.replace(/\n/g, '<br>')
+    messageText.textContent = `(${getTime()}) ${formattedText}`;
+
+    message.appendChild(messageText);
+    chatLog.appendChild(message);
+
+    chatLog.scrollTop = chatLog.scrollHeight; 
+}
 
 function uploadDeliveries() {
     const fileInput = document.getElementById('file');
@@ -37,22 +88,40 @@ function uploadDeliveries() {
 }
 
 function generateDeliveries() {
-    fetch('/generate_deliveries')
-        .then(response => response.json())
-        .then(data => {
-            locations = data.locations;
-            deliveries = data.deliveries;
-            profitList = data.profitList;
-            document.getElementById("frameGUI").src = 'data:image/png;base64,' + data.plot;
-            document.getElementById("revenue").textContent = data.revenueTotal;
-            document.getElementById("cost").textContent = data.cost;
-            document.getElementById("profit").textContent = data.profit;
-            document.getElementById("distance").textContent = data.distance;
-            closeActionDisplay();
-            showPlot();
-            deliveriesAdded = true;
-        })
-        .catch(error => console.error('Error:', error));
+
+    priceModel = {
+        basePrice: document.getElementById("basePrice").value,
+        loadingRate: document.getElementById("loadingRate").value,
+        kilometerPrice: document.getElementById("kilometerPrice").value,
+        kilometerCost: document.getElementById("kilometerCost").value,
+        sell_threshold: document.getElementById("sell_threshold").value,
+        buy_threshold: document.getElementById("buy_threshold").value
+    };
+
+    fetch('/generate_deliveries', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(priceModel)
+    })
+    .then(response => response.json())
+    .then(data => {
+        locations = data.locations;
+        deliveries = data.deliveries;
+        revenueList = data.revenueList;
+        costList = data.costList;
+        profitList = data.profitList;
+        document.getElementById("frameGUI").src = 'data:image/png;base64,' + data.plot;
+        document.getElementById("revenue").textContent = data.revenueTotal;
+        document.getElementById("cost").textContent = data.cost;
+        document.getElementById("profit").textContent = data.profit;
+        document.getElementById("distance").textContent = data.distance;
+        closeActionDisplay();
+        showPlot();
+        deliveriesAdded = true;
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 function showPlot() {
@@ -85,8 +154,7 @@ function checkInputError() {
 }
 
 function registerAuction() {
-    if(!checkInputError())
-    {
+    if(!checkInputError()) {
         return;
     }
 
@@ -114,18 +182,33 @@ function closeActionDisplay() {
     document.getElementById("actionDarkBG").style.display = "none";
 }
 
+//#region Carrier
 function initCarrier(companyName) {
     const socket = io();
 
     socket.on('connect', () => {
         
         socket.on(companyName, (data) => {
-            // sendMessage(data.message, "green");
-            sendConsole(data.message, companyName, "green");
-        });
-
-        socket.on("carrier_error", (data) => {
-            // sendMessage(data.message, "red");
+            let action = data["action"]
+            
+            if(action == "log") {
+                sendMessage(data.message, "gray");
+            }
+            else if(action == "register") {
+                handleRegister(data["payload"]["status"]);
+            }
+            else if(action == "request_offer") {
+                handleRequests(data["payload"]);
+            }
+            else if(action == "bid") {
+                handleBid(data["payload"]);
+            }
+            else if(action == "request_auction_results") {
+                handleAuctionResult(data["payload"], companyName);
+            }
+            else if(action == "confirm") {
+                handleConfirm(data["payload"]);
+            }
         });
 
         fetch('/init_carrier', {
@@ -133,46 +216,154 @@ function initCarrier(companyName) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ companyName: companyName }) // , locations: locations, profitList: profitList })
-        })
+            body: JSON.stringify({ 
+                companyName: companyName, 
+                locations: locations, 
+                revenues: revenueList, 
+                costs: costList, 
+                profits: profitList,
+                basePrice: priceModel['basePrice'],
+                loadingRate: priceModel['loadingRate'],
+                kilometerPrice: priceModel['kilometerPrice'],
+                kilometerCost: priceModel['kilometerCost'],
+                sell_threshold: priceModel['sell_threshold'],
+                buy_threshold: priceModel['buy_threshold'] 
+            })
+        });
     });
 }
 
-function getTime() {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    const currentTime = `${hours}:${minutes}:${seconds}`;
-    return currentTime;
-}
-
-function sendMessage(input, color) {
-    var chatLog = document.getElementById('chatLog');
-    var chatInput = document.getElementById('chatInput');
-
-    var message = document.createElement('div');
-    message.classList.add('message', 'sent');
-
-    if(color == "green")
-    {
-        message.style.backgroundColor = "#e1ffc7";
+function handleRegister(status) {
+    if(status == "OK") {
+        sendMessage("Registered for auction!", "green");
+        return;
     }
 
-    if(color == "red")
-    {
-        message.style.backgroundColor = "#ffdbc7";
+    if(status == "NO_REGISTRATION_PHASE") {
+        sendMessage("Error: Auctioneer is not in registration phase!", "red");
+        return;
+    }
+
+    if(status == "ALREADY_REGISTERED") {
+        sendMessage("Error: The carrier id is already registered!", "red");
+        return;
+    }
+}
+
+function handleRequests(payload) {
+    if(payload["status"] == "OK") {
+        let p_x = payload["offer"]["loc_pickup"]["pos_x"];
+        let p_y = payload["offer"]["loc_pickup"]["pos_y"];
+        let d_x = payload["offer"]["loc_dropoff"]["pos_x"];
+        let d_y = payload["offer"]["loc_dropoff"]["pos_y"];
+
+        let minPrice = payload["offer"]["min_price"];
+        let revenue = payload["offer"]["revenue"];
+        
+        let offeror = payload["offer"]["offeror"];
+
+        sendMessage(`Current Auction: (${p_x}, ${p_y}) -> (${d_x}, ${d_y}) | Minimum price: ${minPrice} | Revenue: ${revenue} | Offer by ${offeror}`, "orange");
+        return;
     }
     
-    var messageText = document.createElement('p');
-    messageText.textContent = `(${getTime()}) ${input}`;
+    if(payload["status"] == "OFFER_REQUEST_TIMEOUT") {
+        sendMessage("Error: the request timed out!", "red");
+        return;
+    }
+    
+    if(payload["status"] == "NO_OFFERS_AVAILABLE") {
+        sendMessage("Error: There are currently no offers available!", "red");
+        return;
+    }
 
-    message.appendChild(messageText);
-    chatLog.appendChild(message);
-
-    chatLog.scrollTop = chatLog.scrollHeight; 
+    if(payload["status"] == "NOT_REGISTERED") {
+        sendMessage("Error: The carrier is not registered for the auction!", "red");
+        return;
+    }
 }
 
+function handleBid(payload) {
+    if(payload["status"] == "OK") {
+        sendMessage(`Bid`, "gray");
+        return;
+    }
+    
+    if(payload["status"] == "BIDDING_TIMEOUT") {
+        sendMessage("Error: Bidding request timed out!", "red");
+        return;
+    }
+    
+    if(payload["status"] == "INVALID_BID") {
+        sendMessage("Error: There bid was invalid!", "red");
+        return;
+    }
+
+    if(payload["status"] == "NOT_REGISTERED") {
+        sendMessage("Error: The carrier is not registered for the auction!", "red");
+        return;
+    }
+}
+
+function handleAuctionResult(payload, carrierId) {
+    if(payload["status"] == "OK") {
+        let winner = payload["offer"]["winner"];
+        let winningBid = payload["offer"]["winning_bid"];
+        
+        if(winner == carrierId) {
+            sendMessage(`The winner of the auction is ${winner} for ${winningBid}€`, "green");
+            return;
+        }
+
+        if(winner == "NONE") {
+            sendMessage(`There is not winner for the auction.`, "red");
+            return;
+        }
+
+        sendMessage(`The winner of the auction is ${winner} for ${winningBid}€`, "red");
+        return;
+    }
+    
+    if(payload["status"] == "NO_RESULTS_AVAILABLE") {
+        sendMessage("Error: There are no results available!", "red");
+        return;
+    }
+    
+    if(payload["status"] == "NO_RESULTS_PHASE") {
+        sendMessage("Error: The auctioneer is not in a result phase!", "red");
+        return;
+    }
+
+    if(payload["status"] == "NOT_REGISTERED") {
+        sendMessage("Error: The carrier is not registered for the auction!", "red");
+        return;
+    }
+}
+
+function handleConfirm(payload) {
+    if(payload["status"] == "OK") {
+        sendMessage("The result has been confirmed!", "gray");
+        return;
+    }
+    
+    if(payload["status"] == "NO_CONFIRMATION_AVAILABLE") {
+        sendMessage("Error: There was no confirmation!", "red");
+        return;
+    }
+    
+    if(payload["status"] == "CONFIRMATION_TIMEOUT") {
+        sendMessage("Error: The comfirmation timed out!", "red");
+        return;
+    }
+
+    if(payload["status"] == "NOT_REGISTERED") {
+        sendMessage("Error: The carrier is not registered for the auction!", "red");
+        return;
+    }
+}
+//#endregion
+
+
+//#region Auctioneer
 function startServer() {
     document.getElementById("auctioneerChat").style.display = "flex";
     document.getElementById("serverButton").style.display = "none";
@@ -186,12 +377,22 @@ function initAuctioneer() {
 
     socket.on('connect', () => {
         socket.on('auctioneer_log', (data) => {
-            // sendMessage(data.message, "green");
-            sendConsole(data.message, "auctioneerSim", "green");
+            sendMessage(data.message, "gray");
         });
 
-        socket.on('auctioneer_offers', (data) => {
-            // sendMessage(data.message, "red");
+        socket.on('auctioneer', (data) => {
+            if(data["action"] == "addAuction") {
+                createAuction(data["payload"]);
+            }
+            else if(data["action"] == "addBid") {
+                handleBid(data);
+            }
+            else if(data["action"] == "addResult") {
+                handleResult(data);
+            }
+            else if(data["action"] == "end") {
+                handleAuctionEnd();
+            }
         });
 
         fetch('/init_auctioneer', {
@@ -200,6 +401,37 @@ function initAuctioneer() {
         
     });
 } 
+
+function handleBid(data) {
+    sendMessage(data.message, "orange");
+
+    var auctionStatusDiv = document.getElementById(data["payload"]["offerId"]);
+    auctionStatusDiv.textContent = "Bidding...";
+
+    var auctionDivParent = auctionStatusDiv.parentNode.parentNode;
+    auctionDivParent.style.backgroundColor = "#f1b04c";
+}
+
+function handleResult(data) {
+    var winner = data["payload"]["winner"];
+    var auctionStatusDiv = document.getElementById(data["payload"]["offer_id"]);
+    var auctionDivParent = auctionStatusDiv.parentNode.parentNode;
+    
+    if(winner == "NONE") {
+        sendMessage("There is no winner for the request", "red");
+        auctionStatusDiv.textContent = "No winner";
+        auctionDivParent.style.backgroundColor = RED;
+    }
+    else {
+        sendMessage("Winner of the auction is " + winner, "green");
+        auctionStatusDiv.textContent = "Winner: " + winner;
+        auctionDivParent.style.backgroundColor = GREEN;
+    }
+}
+
+function handleAuctionEnd() {
+    sendMessage("Auction day closed. Restart server for new auctions.", "red");
+}
 
 function createAuction(input) {
     var chatLog = document.getElementById('auctionLog');
@@ -220,9 +452,11 @@ function createAuction(input) {
     auctionTitle.classList.add('auctionTitle');
 
     var auctionInfo = document.createElement('div');
+    var auctionId = document.createElement('div');
     
     var auctionStatus = document.createElement('div');
     auctionStatus.classList.add('auctionStatus');
+    auctionStatus.setAttribute('id', input["offerId"]);
 
     logText.style.backgroundColor = "#CCCCCC";
 
@@ -230,15 +464,16 @@ function createAuction(input) {
     
     logText.appendChild(textSection1);
 
-    auctionTitle.textContent = `.`;
     logText.appendChild(divider);
 
     logText.appendChild(textSection2);
 
-    auctionTitle.textContent = `Request ${input}`;
-    auctionInfo.textContent = `(x, y) -> (x, y), Revenue: ${input}`;
+    auctionTitle.textContent = `(${input["pickup"]["pos_x"]}, ${input["pickup"]["pos_y"]}) -> (${input["dropoff"]["pos_x"]}, ${input["dropoff"]["pos_y"]})`;
+    auctionInfo.textContent = `Min Price: ${input["minPrice"]}€, Revenue: ${input["revenue"]}€`;
+    auctionId.textContent = `ID: ${input["offerId"]}`;
     textSection1.appendChild(auctionTitle);
     textSection1.appendChild(auctionInfo);
+    textSection1.appendChild(auctionId);
     
     auctionStatus.textContent = "Waiting...";
     textSection2.appendChild(auctionStatus);
@@ -293,7 +528,6 @@ function biddingAuction(input) {
     
     logText.appendChild(textSection1);
 
-    auctionTitle.textContent = `.`;
     logText.appendChild(divider);
 
     logText.appendChild(textSection2);
@@ -310,7 +544,10 @@ function biddingAuction(input) {
 
     // chatLog.scrollTop = chatLog.scrollHeight; 
 }
+//#endregion
 
+
+//#region Simulation
 function sendConsole(input, agentID, color) {
     var console = document.getElementById(agentID);
 
@@ -411,3 +648,4 @@ function startCarriers(totalConsoles) {
     }
 }
 
+//#endregion

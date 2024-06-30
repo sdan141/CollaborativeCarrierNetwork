@@ -23,6 +23,8 @@ class AuctioneerServer:
 
         auction_thread.join()
         self.stop_server()
+        exit()
+
 
     def handle_connections(self):
         with threading.Lock():   
@@ -32,12 +34,16 @@ class AuctioneerServer:
             print("Auctioneer server started, waiting for connections...")
             self.socketio.emit('auctioneer_log', {'message': "Auctioneer server started, waiting for connections..."})
 
+
         while not self._stop_event.is_set():
             client_socket, addr = self.server_socket.accept()
             print(f"Connection from {addr} has been established.")
-            self.socketio.emit('auctioneer_log', {'message': f"Connection from {addr} has been established."})
-            carrier_handler = CarrierHandler(self.auctioneer, client_socket)
+            carrier_handler = CarrierHandler(self.auctioneer, client_socket, self.socketio)
             carrier_handler.start()
+        
+        carrier_handler.join()
+        self.stop_server()
+        exit()
 
     def stop_server(self):
         self._stop_event.set()

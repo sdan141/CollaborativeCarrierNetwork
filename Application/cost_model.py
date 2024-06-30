@@ -1,29 +1,35 @@
-#import yaml
-import utilities as util
+import yaml
+import utilities as utils
+import random
 
 class CostModel:
 
-    def __init__(self, config_file):
+    def __init__(self, cost_model):
+        self.a1 = cost_model['base_price']
+        self.a2 = cost_model['loadingRate']
+        self.b1 = cost_model['kilometerPrice']
+        self.b2 = cost_model['kilometerCost']
+        self.sell_threshhold = cost_model['sell_threshold']
+        self.buy_threshhold = cost_model['buy_threshold']
+        print(self.sell_threshhold)
 
-        if not config_file:
-            cost_model = util.random_cost_model()
-        else: 
-            with open(config_file, 'rb') as stream:
-                try:
-                   data_loaded = yaml.safe_load(stream)
-                   cost_model = data_loaded['cost_model']
-                except yaml.YAMLError as e:
-                    print(e)
-
-        self.a1 = cost_model['a1']
-        self.a2 = cost_model['a2']
-        self.b1 = cost_model['b1']
-        self.b2 = cost_model['b2']
-                
-    def get_marginal_cost(offers, distance):
+    def get_mariginal_revenue(self, loc_pickup, loc_dropoff):
+        margin_revenue = self.a1 + self.a2*utils.get_distance(loc_pickup, loc_dropoff)
+        return margin_revenue
+    
+    def get_total_revenue(self):
         pass
 
-    def get_direct_cost(distance):
+
+    def get_marginal_cost(self, marginal_distance):
+        margin_cost = self.b1 + self.b2*marginal_distance
+        return margin_cost
+
+    def get_total_cost(self):
         pass
 
-        
+    def get_marginal_profit(self):
+        pass
+
+    def get_total_profit(self):
+        pass        

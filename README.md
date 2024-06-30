@@ -15,41 +15,50 @@ The objective of this project is to implement a system that facilitates the reas
 
         pip install -r requirements.txt
         
-## Usage 
+## Agent Infrastructure 
 
 * Use as Carrier
     
         cd Agent_Infrastructure
+        python3 carrier_main.py [CVS File]
 
-        python3 carrier_main.py
+If no file is added for the carrier the requests are randomly generated.
 
 * Use as Auctioneer
 
         cd Agent_Infrastructure
-
         python3 auctioneer_main.py
+
+
+## Application
 
 * Start application
 
         cd Application
-        
         python3 app.py [portNumber]
 
-## Application
+It is advised to run a server on a different port for each client due to performance reasons.
+After starting the server you can run the application at http://127.0.0.1:portNumber in a browser.
 
-* Use as Carrier
-    
-        > carrier.html
+![Selection screen](readme_pictures/Selection.png)
+
+1. Use as Carrier
+
+After adding delivery requests and the company name you can try to register for an auction.
+Deliveries can be generated or uploaded.
+Files in the supported format are in the folder 'example__requests'.
 
 
-* Use as Auctioneer
+2. Use as Auctioneer
 
-        > auctioneer.html
+To start the server and the auction day click the button 'Start server'.
+After the auction day ends the server is stopped.
+To restart the server for a new auction day click the the now ornage button 'restart'.
 
 
-* Simulate
+3. Simulate
 
-        > simulation.html
+The simulation lets you simulate a specified amount of carriers with multiple console output.
 
 
 ## Authors

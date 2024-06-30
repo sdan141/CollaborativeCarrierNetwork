@@ -391,6 +391,7 @@ body {
     flex-direction: column;
     justify-content: center;
     flex: 1 1 0px;
+    gap: 10px;
 }
 
 .auctionLogTextDivider {
@@ -402,7 +403,7 @@ body {
 }
 
 .auctionTitle {
-    font-size: 2em;
+    font-size: 1.25em;
 }
 
 .auctionStatus {

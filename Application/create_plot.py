@@ -1,31 +1,16 @@
-"""Visualizes tours of carriers with a GUI
-
-This module provides functions for visualizing carrier routes on a plot.
-The GUI can handle button clicks by redrawing the plot based on the clicked label.
-
-Functions:
-    show_tour(carriers): 
-        Display the tour of carriers with a GUI.
-        
-    handle_button_click(label, carriers, ax): 
-        Handle radio button click event by updating the plot based on the label.
-        
-    show_all_carriers(carriers, ax):
-        Display all carriers on the plot with distinct colors.
-    
-    draw_graph(carrier, color, ax): 
-        Draw a graph for a carrier tour with selected color.
-"""
 import networkx as nx
 import matplotlib.pyplot as plt
-from matplotlib.widgets import RadioButtons
+import io
+import base64
 
-def show_tour(locations, tour_calculation):
+def create_plot(locations, tour_calculation):
     # Adjust the figure size by setting the figsize parameter
     fig, ax = plt.subplots() 
 
     random_locations = locations
+    print(random_locations)
     tour = tour_calculation
+    print(tour)
     color = "#D26466"
     
     location_nodes = {f'{i}': loc for i, loc in enumerate(random_locations)}
@@ -79,12 +64,9 @@ def show_tour(locations, tour_calculation):
     
     ax.figure.canvas.draw()
 
-    return fig
-    # plt.show()
+    output = io.BytesIO()
+    fig.savefig(output, format='png')
+    output.seek(0)
+    plot_base64 = base64.b64encode(output.getvalue()).decode('utf-8')
 
-
-
-
-    
-
-    
+    return plot_base64

@@ -11,40 +11,36 @@
     <input type="file" id="file" accept=".xlsx, .xls" style="display: block; height: 50px; font-size: 1.5em; margin-top: 20px;">
     <div class="buttonStyle" id="uploadButton" onclick="uploadDeliveries()">Upload</div>
     <div id="settings">
-        <p class="valueText" id="maxVal">
-            Sell request below: 
-            <input type="number" id="numberInput" min="0" max="100" value="50" oninput="updateSlider(this.value)" class="valueInput">
-        </p>
-        
-        <p class="valueText" id="minVal">
-            Buy for minimum profit: 
-            <input type="number" id="numberInput" min="0" max="100" value="50" oninput="updateSlider(this.value)" class="valueInput">
-        </p>
-
-        <p class="valueText" id="minVal">
-            Buy for minimum profit: 
-            <input type="number" id="numberInput" min="0" max="100" value="50" oninput="updateSlider(this.value)" class="valueInput">
-        </p>
-
         <p class="valueText" id="minVal">
             Base Price: 
-            <input type="number" id="numberInput" min="0" max="100" value="20" oninput="updateSlider(this.value)" class="valueInput">
+            <input type="number" id="basePrice" min="0" value="300" oninput="updateSlider(this.value)" class="valueInput">
         </p>
 
         <p class="valueText" id="minVal">
             Loading Rate: 
-            <input type="number" id="numberInput" min="0" max="100" value="10" oninput="updateSlider(this.value)" class="valueInput">
+            <input type="number" id="loadingRate" min="0"  value="100" oninput="updateSlider(this.value)" class="valueInput">
         </p>
 
         <p class="valueText" id="minVal">
             Kilometer Price: 
-            <input type="number" id="numberInput" min="0" max="100" value="2" oninput="updateSlider(this.value)" class="valueInput">
+            <input type="number" id="kilometerPrice" min="0"  value="60" oninput="updateSlider(this.value)" class="valueInput">
         </p>
 
         <p class="valueText" id="minVal">
             Kilometer Cost: 
-            <input type="number" id="numberInput" min="0" max="100" value="1" oninput="updateSlider(this.value)" class="valueInput">
+            <input type="number" id="kilometerCost" min="0" value="30" oninput="updateSlider(this.value)" class="valueInput">
         </p>
+
+        <p class="valueText" id="maxVal">
+            Sell request below: 
+            <input type="number" id="sell_threshold" min="0" value="190" oninput="updateSlider(this.value)" class="valueInput">
+        </p>
+        
+        <p class="valueText" id="minVal">
+            Buy for minimum profit: 
+            <input type="number" id="buy_threshold" min="0" value="20" oninput="updateSlider(this.value)" class="valueInput">
+        </p>
+
     </div>
     <div class="buttonStyle" id="generateButton" onclick="generateDeliveries()">Generate</div>
 </div>

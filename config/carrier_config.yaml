@@ -1,0 +1,6 @@
+# Carrier constants
+constants: 
+  request_amount: 5
+  vehicle_maximum_distance: 3000
+  num_vehicles: 1
+  depot_location: 0

@@ -1,3 +1,28 @@
+import csv
+import os
+
+def create_csv(file_path):
+    # Data to be written to the CSV file
+    headers = ["a1 value", "a2 value", "b1 value", "b2 value", "other value"]
+    data = [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 10, 11, 12],
+    ]
+
+    # Write to CSV file
+    with open(file_path, 'w', newline='') as file:
+        writer = csv.writer(file)
+        
+        # Write headers
+        writer.writerow(headers)
+        
+        # Write the rest of the data
+        writer.writerows(data)
+
+    print(f"CSV file created successfully at {os.path.abspath(file_path)}")
+
+
 import pandas as pd
 
 def handle_file(uploaded_file):

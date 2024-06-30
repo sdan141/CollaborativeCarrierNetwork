@@ -1,35 +1,27 @@
-"""Calculate the optimal tour for a set of delivery locations using OR-Tools.
-
-This module provides functions to calculate the optimal tour for a set of delivery 
-locations using the OR-Tools routing library. Simple Pickup Delivery Problem (PDP): 
-https://developers.google.com/optimization/routing/pickup_delivery?hl=de
-
-Functions:
-    create_distance_matrix(locations):
-        Creates a distance matrix with a given list of locations.      
-
-    create_tour_data(locations, assigned_deliveries):
-        Creates tour data that is in the format needed for 'get_optimal_tour()'.
-
-    get_optimal_tour(data):
-        Calculates the most optimal tour for all locations and assigned deliveries.
-
-Constants:
-    VEHICLE_MAXIMUM_DISTANCE (int): 
-        Maximum travel distance per vehicle.
-
-    NUM_VEHICLES (int): 
-        Number of vehicles available for delivery.
-
-    DEPOT_LOCATION (int): 
-        Index of the depot location.
-"""
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 
 VEHICLE_MAXIMUM_DISTANCE = 3000
 NUM_VEHICLES = 1
 DEPOT_LOCATION = 0
+
+def create_tour_data(locations, assigned_deliveries):
+    '''Create data required for 'get_optimal_tour()'.
+
+    Args:
+        locations (list of tuples): List of tuples containing (x, y) coordinates.
+        assigned_deliveries (list of lists): List of pairs [x, y] representing assigned delivery locations.
+
+    Returns:
+        dict: Dictionary containing tour data.
+    '''
+    data = {}
+    data["distance_matrix"] = create_distance_matrix(locations)
+    data["pickups_deliveries"] = assigned_deliveries
+    data["num_vehicles"] = NUM_VEHICLES
+    data["depot"] = DEPOT_LOCATION
+    return data
+
 
 def create_distance_matrix(locations):
     '''Create distance matrix using taxicab geometry. https://en.wikipedia.org/wiki/Taxicab_geometry
@@ -49,22 +41,6 @@ def create_distance_matrix(locations):
         dist_mat.append(distance_for_location_x) 
     return dist_mat 
 
-def create_tour_data(locations, assigned_deliveries):
-    '''Create data required for 'get_optimal_tour()'.
-
-    Args:
-        locations (list of tuples): List of tuples containing (x, y) coordinates.
-        assigned_deliveries (list of lists): List of pairs [x, y] representing assigned delivery locations.
-
-    Returns:
-        dict: Dictionary containing tour data.
-    '''
-    data = {}
-    data["distance_matrix"] = create_distance_matrix(locations)
-    data["pickups_deliveries"] = assigned_deliveries
-    data["num_vehicles"] = NUM_VEHICLES
-    data["depot"] = DEPOT_LOCATION
-    return data
 
 def get_optimal_tour(data):
     '''Calculates the optimal tour.
