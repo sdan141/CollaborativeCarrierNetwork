@@ -77,7 +77,7 @@ class Routing(AlgorithmBase):
         locations = [self.depot_location]
         assignments = []
         for offer in self.offers:
-            if offer.winner == "NONE" or offer.winner == self.carrier_id : 
+            if offer.on_auction == False : 
                 # interested only in transport requests that were not sold or that were bought by the carrier
                 # extract positions and append to locations
                 pickup_index = len(locations)  # Index of the next pickup location
@@ -142,7 +142,7 @@ class Routing(AlgorithmBase):
             for i,offer in enumerate(self.offers):
                 if offer_to_update['offer_id']==offer.offer_id:
                     offer.winner = offer_to_update['winner']
-                    offer.winning_bid = offer_to_update['winning_bid']
+                    offer.winning_bid = round(float(offer_to_update['winning_bid']),2)
                     if offer.winner == self.carrier_id:
                         offer.on_auction = False
                         # carrier is the winner -> add location back to tour
@@ -178,8 +178,8 @@ class Routing(AlgorithmBase):
         offer_id = offer['offer_id']
         loc_pickup = offer['loc_pickup']
         loc_dropoff = offer['loc_dropoff']
-        price = offer['winning_bid']
-        revenue = offer['revenue']
+        price = round(float(offer['winning_bid']),2)
+        revenue = round(float(offer['revenue']),2)
         self.offers.append(Offer(carrier_id, offer_id, loc_pickup, loc_dropoff, revenue=revenue, winning_bid=price, winner=self.carrier_id)) # offer.on_auction = False by default
         self.add_location(pickup=[offer['loc_pickup']], dropoff=[offer['loc_dropoff']])
 
@@ -224,7 +224,7 @@ class Routing(AlgorithmBase):
             optimal_tour_without_offer = self.get_optimal_tour(ignore_indices=[i])
             margin_distance = float(self.optimal_tour['distance']) - float(optimal_tour_without_offer['distance'])
             margin_cost = self.cost_model.get_marginal_cost(margin_distance)
-            new_stats['new_cost']  += margin_cost
+            new_stats['new_cost'] += margin_cost
            
             # add cost of buying offer if offer bought on auction
             if offer.carrier_id != self.carrier_id:

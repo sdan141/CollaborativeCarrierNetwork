@@ -7,7 +7,7 @@ class CostModel:
 
         if not config_data:
             cost_model = utils.random_cost_model()
-            self.threshold = random.randrange(180,200)
+            self.threshold = random.randrange(325,330)
         else: 
             cost_model = config_data['cost_model']
             self.threshold = config_data['threshold']

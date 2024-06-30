@@ -68,7 +68,7 @@ def get_distance(p0, p1, mode="euclid"):
     
 
 def random_cost_model():
-    costs = np.round(np.random.uniform((700,185,50,23),(750,215,55,28),4),2)
+    costs = np.round(np.random.uniform((900,190,50,27),(950,220,55,32),4),2)
     print(f"\nCarrier random cost model:\n a_1 = {round(costs[0],2)}, a_2 = {round(costs[1],2)}, \
                                            b_1 = {round(costs[2],2)}, b_2 = {round(costs[3],2)}\n")
     return {'a1': costs[0], 'a2': costs[1], 'b1': costs[2], 'b2': costs[3]}

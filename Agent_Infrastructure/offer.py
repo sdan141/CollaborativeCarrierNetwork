@@ -27,7 +27,7 @@ class Offer:
             second_highest_bid = sorted_bids[1][1]
             winner = sorted_bids[0][0]
             if second_highest_bid <= self.profit:
-                return False
+                return self.get_highest_bid()
             return winner, second_highest_bid
         
     def get_highest_bid(self):

@@ -27,7 +27,7 @@ class Carrier:
         while time.time() < timeout:
             time.sleep(1)
 
-    def calculate_bid(self, offer, randomized=True):
+    def calculate_bid(self, offer, randomized=False):
         offer_id = offer['offer_id']
         revenue = float(offer['revenue'])
         if randomized:
@@ -114,8 +114,8 @@ class Carrier:
                 self.update_offer_list(received_offer)              
 
             if not response["payload"]["next_round"]:
-                self.print_offer_list(show_cost=True, show_profit=True)
                 self.routing.update_statistics()
+                self.print_offer_list(show_cost=True, show_profit=True)
                 print("\nAuction day over")
                 exit()
 
