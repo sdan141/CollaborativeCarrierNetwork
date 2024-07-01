@@ -1,4 +1,3 @@
-# imports...
 import numpy as np
 import yaml
 import uuid
@@ -29,7 +28,7 @@ def load_config(config_file):
 
 class Routing(AlgorithmBase):
 
-    def __init__(self, carrier_id, path_config=None, n=5):
+    def __init__(self, carrier_id, path_config=None, n=6):
         # load config file
         config_data = load_config(path_config) if path_config else None
         self.carrier_id = carrier_id
@@ -170,7 +169,7 @@ class Routing(AlgorithmBase):
     def delete_location(self, ignore_indices):
         locations = []; assignments = []
         locations, assignments = self.filter_requests_by_index(ignore_indices)
-        self.locations = locations; self.assignments =assignments
+        self.locations = locations; self.assignments = assignments
 
 
     def add_offer(self, offer):
@@ -206,6 +205,7 @@ class Routing(AlgorithmBase):
         # set new locations and assignments lists
         locations, assignments = self.get_locations_and_assignments()
         self.locations, self.assignments = locations, assignments
+        assert len(self.locations) == len(offers_not_sold)*2+1
         self.optimal_tour = self.get_optimal_tour()
         new_stats = {
         'new_revenue': 0,
@@ -223,13 +223,17 @@ class Routing(AlgorithmBase):
             
             optimal_tour_without_offer = self.get_optimal_tour(ignore_indices=[i])
             margin_distance = float(self.optimal_tour['distance']) - float(optimal_tour_without_offer['distance'])
+            assert margin_distance >= 0
             margin_cost = self.cost_model.get_marginal_cost(margin_distance)
+            assert margin_cost >= 0
             new_stats['new_cost'] += margin_cost
            
             # add cost of buying offer if offer bought on auction
             if offer.carrier_id != self.carrier_id:
                 new_stats['new_cost'] += offer.winning_bid      
-            offer.cost = margin_cost + (offer.winning_bid if offer.winning_bid!="NONE" else 0) 
+            offer.cost = margin_cost 
+            if offer.winning_bid!="NONE" and offer.winner!="NONE" and offer.winner != self.carrier_id:
+                offer.cost += offer.winning_bid 
             offer.profit = offer.revenue - offer.cost
         new_stats['new_profit']  = new_stats['new_revenue'] - new_stats['new_cost']  
         self.save_print_results(new_stats, save) 
