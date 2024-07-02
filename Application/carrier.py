@@ -59,7 +59,7 @@ class Carrier:
         print(f"\nSending offers with profit below threshold...\n")
         if requests_below_thresh_list:
             for offer in requests_below_thresh_list:
-                self.socketio.emit(self.carrier_id, {'message': f"Send offer ({offer.loc_pickup['pos_x']}, {offer.loc_pickup['pos_y']}) -> ({offer.loc_dropoff['pos_x']}, {offer.loc_dropoff['pos_y']}) | Profit: {offer.min_price}", 
+                self.socketio.emit(self.carrier_id, {'message': f"Sent offer ({offer.loc_pickup['pos_x']}, {offer.loc_pickup['pos_y']}) -> ({offer.loc_dropoff['pos_x']}, {offer.loc_dropoff['pos_y']}) | Profit: {offer.min_price}", 
                                                      "action": "log"}) 
                 response = self.request_handler.send_offer(offer) # Send an offer
         else:
