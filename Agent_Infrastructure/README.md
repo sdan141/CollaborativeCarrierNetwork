@@ -1,10 +1,6 @@
 # Agent Infrastructure
 
-## Description
-
-## Visuals
-
-## Runnig the example shell script
+## Running the example shell script
 
 The shell script will open a terminal for the auctioneer agent and three carrier agents. As a check, it will open a fourth terminal for an already registered carrier. This example demonstrates the workflow of one auction round and illustrates the communication between the agents.
 
@@ -20,6 +16,6 @@ The shell script will open a terminal for the auctioneer agent and three carrier
 
 3. Enter to the directory location of the shell script with cd (depends on current working directory)
 
-4. Execute the shell script:
+4. Execute the shell script, replace <CARRIER_AMOUNT> with the desired amount for testing:
 
-        ./test_ams.sh
+        ./test_n_carrier.sh <CARRIER_AMOUNT>
