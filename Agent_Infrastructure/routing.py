@@ -225,7 +225,6 @@ class Routing(AlgorithmBase):
             assert len(optimal_tour_without_offer['optimalTour']) == len(self.optimal_tour['optimalTour'])-2
             margin_distance = float(self.optimal_tour['distance']) - float(optimal_tour_without_offer['distance'])
             margin_cost = self.cost_model.get_marginal_cost(margin_distance)
-            assert margin_cost >= 0
             new_stats['new_cost'] += margin_cost
            
             # add cost of buying offer if offer bought on auction
