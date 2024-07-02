@@ -1,5 +1,5 @@
 # Auctioneer constants
 constants:
   port_number: 12350
-  base_timeout: 20
+  base_timeout: 10
   max_rounds: 5

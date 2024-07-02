@@ -22,6 +22,7 @@ class AuctioneerServer:
         connection_thread.start()
 
         auction_thread.join()
+        connection_thread.join()
         self.stop_server()
         exit()
 
@@ -29,6 +30,7 @@ class AuctioneerServer:
     def handle_connections(self):
         with threading.Lock():   
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Hack: "Address already in use"
             self.server_socket.bind((self.host, self.port))
             self.server_socket.listen(5)
             print("Auctioneer server started, waiting for connections...")
@@ -37,13 +39,12 @@ class AuctioneerServer:
 
         while not self._stop_event.is_set():
             client_socket, addr = self.server_socket.accept()
-            print(f"Connection from {addr} has been established.")
+            # print(f"Connection from {addr} has been established.") #FIXME
             carrier_handler = CarrierHandler(self.auctioneer, client_socket, self.socketio)
             carrier_handler.start()
-        
         carrier_handler.join()
         self.stop_server()
-        exit()
+
 
     def stop_server(self):
         self._stop_event.set()

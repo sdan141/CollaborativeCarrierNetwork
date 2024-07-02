@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import io
 import base64
 
-def create_plot(locations, tour_calculation):
+def create_plot(locations, tour_calculation, colorCode):
     # Adjust the figure size by setting the figsize parameter
     fig, ax = plt.subplots() 
 
@@ -11,7 +11,7 @@ def create_plot(locations, tour_calculation):
     print(random_locations)
     tour = tour_calculation
     print(tour)
-    color = "#D26466"
+    color = colorCode # "#D26466"
     
     location_nodes = {f'{i}': loc for i, loc in enumerate(random_locations)}
     Graph = nx.DiGraph()

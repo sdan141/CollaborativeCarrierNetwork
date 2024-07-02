@@ -4,6 +4,8 @@ var requests_file;
 var locations, deliveries, costList, revenueList, profit_list;
 var basePrice, loadingRate, kilometerPrice, kilometerCost;
 var priceModel;
+var bundles = [];
+var old_plot, old_distance, old_revenue, old_cost, old_profit;
 
 const RED = '#ffc3b3';
 const GREEN = '#e1ffc7';
@@ -72,12 +74,29 @@ function uploadDeliveries() {
     .then(data => {
         locations = data.locations;
         deliveries = data.deliveries;
+        revenueList = data.revenueList;
+        costList = data.costList;
         profitList = data.profitList;
-        document.getElementById("frameGUI").src = 'data:image/png;base64,' + data.plot;
-        document.getElementById("revenue").textContent = data.revenueTotal;
-        document.getElementById("cost").textContent = data.cost;
-        document.getElementById("profit").textContent = data.profit;
-        document.getElementById("distance").textContent = data.distance;
+        old_plot = 'data:image/png;base64,' + data.plot;
+        document.getElementById("frameGUI").src = old_plot;
+        old_revenue = data.revenueTotal;
+        document.getElementById("revenue").textContent = old_revenue;
+        old_cost = data.cost;
+        document.getElementById("cost").textContent = old_cost;
+        old_distance = data.distance;
+        document.getElementById("distance").textContent = old_distance;
+        old_profit = data.profit;
+        document.getElementById("profit").textContent = old_profit;
+
+        priceModel = {
+            basePrice: data.basePrice,
+            loadingRate: data.loadingRate,
+            kilometerPrice: data.kilometerPrice,
+            kilometerCost: data.kilometerCost,
+            sell_threshold: data.sell_threshold,
+            buy_threshold: data.buy_threshold
+        };
+
         closeActionDisplay();
         showPlot();
         deliveriesAdded = true;
@@ -209,6 +228,9 @@ function initCarrier(companyName) {
             else if(action == "confirm") {
                 handleConfirm(data["payload"]);
             }
+            else if(action == "end") {
+                handleEnd(data, companyName);
+            }
         });
 
         fetch('/init_carrier', {
@@ -233,9 +255,111 @@ function initCarrier(companyName) {
     });
 }
 
+let new_locations = []
+let new_deliveries = [];
+let new_revenue = 0;
+let new_cost = 0
+var new_profit, new_distance, new_plot;
+
+function handleEnd(data, companyName) {
+    sendMessage("Auction is over!", "gray");
+    sendMessage("Your requests:", "gray");
+
+    let payload = JSON.parse(data["payload"]);
+    new_locations.push(locations[0]) // depot
+    console.log(new_locations);
+
+    for (let i = 0; i < payload.length; i++) {
+        if((payload[i]["winner"] == "NONE")) {
+            sendMessage(`${i+1}: (${payload[i]["loc_pickup"]["pos_x"]}, ${payload[i]["loc_pickup"]["pos_y"]}) -> (${payload[i]["loc_dropoff"]["pos_x"]}, ${payload[i]["loc_dropoff"]["pos_y"]})`, "gray");
+            new_revenue += parseFloat(payload[i]["revenue"]);
+            console.log("Before pick");
+            let pickup = [parseFloat(payload[i]["loc_pickup"]["pos_x"]), parseFloat(payload[i]["loc_pickup"]["pos_y"])];
+            new_locations.push(pickup);
+            let dropoff = [parseFloat(payload[i]["loc_dropoff"]["pos_x"]), parseFloat(payload[i]["loc_dropoff"]["pos_y"])];
+            new_locations.push(dropoff);
+        } 
+        else if(payload[i]["winner"] == companyName) {
+            if(payload[i]["offeror"] != companyName) {
+                sendMessage(`${i+1}: Bought (${payload[i]["loc_pickup"]["pos_x"]}, ${payload[i]["loc_pickup"]["pos_y"]}) -> (${payload[i]["loc_dropoff"]["pos_x"]}, ${payload[i]["loc_dropoff"]["pos_y"]}) for ${payload[i]["winning_bid"]}€`, "gray");
+                new_cost += parseFloat(payload[i]["winning_bid"]);
+            }
+            else {
+                sendMessage(`${i+1}: (${payload[i]["loc_pickup"]["pos_x"]}, ${payload[i]["loc_pickup"]["pos_y"]}) -> (${payload[i]["loc_dropoff"]["pos_x"]}, ${payload[i]["loc_dropoff"]["pos_y"]})`, "gray");
+            }
+            new_revenue += parseFloat(payload[i]["revenue"]);
+            let pickup = [parseFloat(payload[i]["loc_pickup"]["pos_x"]), parseFloat(payload[i]["loc_pickup"]["pos_y"])];
+            new_locations.push(pickup);
+            let dropoff = [parseFloat(payload[i]["loc_dropoff"]["pos_x"]), parseFloat(payload[i]["loc_dropoff"]["pos_y"])];
+            new_locations.push(dropoff);
+        } 
+        else {
+            sendMessage(`${i+1}: Sold (${payload[i]["loc_pickup"]["pos_x"]}, ${payload[i]["loc_pickup"]["pos_y"]}) -> (${payload[i]["loc_dropoff"]["pos_x"]}, ${payload[i]["loc_dropoff"]["pos_y"]}) for ${payload[i]["winning_bid"]}€`, "gray");
+            new_revenue += parseFloat(payload[i]["winning_bid"]);
+        } 
+    } 
+
+    console.log(new_locations);
+
+    updateValues(); // locations and assignments
+}
+
+function updateValues() {
+    values = {
+        locations: new_locations,
+        kilometerCost: priceModel["kilometerCost"],
+        loadingRate: priceModel["loadingRate"]
+    };
+
+    fetch('/get_plot', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(values)
+    })
+    .then(response => response.json())
+    .then(data => {
+        new_plot = 'data:image/png;base64,' + data.plot;
+        new_distance = data.distance;
+        new_cost = data.cost;
+    })
+    .catch(error => console.error('Error:', error)); 
+
+    tourButton = document.getElementById("switchTourButton");
+    tourButton.style.backgroundColor = '#ffa500';
+    tourButton.style.cursor = 'pointer';
+    tourButton.addEventListener('click', switchPlots);
+}
+
+function switchPlots() {
+    guiTitle = document.getElementById("guiTitle");
+
+    if(guiTitle.textContent == "Starting Tour") 
+    {
+        guiTitle.textContent = "New Tour";
+        document.getElementById("frameGUI").src = new_plot;
+        document.getElementById("revenue").textContent = Math.round(new_revenue * 100) / 100;
+        document.getElementById("cost").textContent = Math.round(new_cost * 100) / 100;
+        new_profit = new_revenue - new_cost;
+        document.getElementById("profit").textContent = Math.round(new_profit * 100) / 100;
+        document.getElementById("distance").textContent = new_distance;
+        
+    }
+    else if(guiTitle.textContent == "New Tour")
+    {
+        guiTitle.textContent = "Starting Tour";
+        document.getElementById("frameGUI").src = old_plot;
+        document.getElementById("revenue").textContent = old_revenue;
+        document.getElementById("cost").textContent = old_cost;
+        document.getElementById("profit").textContent = old_profit;
+        document.getElementById("distance").textContent = old_distance;
+    }
+}
+
 function handleRegister(status) {
     if(status == "OK") {
-        sendMessage("Registered for auction!", "green");
+        sendMessage("Registered for auction!", "gray");
         return;
     }
 
@@ -252,17 +376,17 @@ function handleRegister(status) {
 
 function handleRequests(payload) {
     if(payload["status"] == "OK") {
-        let p_x = payload["offer"]["loc_pickup"]["pos_x"];
-        let p_y = payload["offer"]["loc_pickup"]["pos_y"];
-        let d_x = payload["offer"]["loc_dropoff"]["pos_x"];
-        let d_y = payload["offer"]["loc_dropoff"]["pos_y"];
+        console.log(payload["offer"]);
+        sendMessage("On auction:", "orange");
 
-        let minPrice = payload["offer"]["min_price"];
-        let revenue = payload["offer"]["revenue"];
-        
-        let offeror = payload["offer"]["offeror"];
+        for (let i = 0; i < payload["offer"]["loc_pickup"].length; i++) {
+            let p_x = payload["offer"]["loc_pickup"][i]["pos_x"];
+            let p_y = payload["offer"]["loc_pickup"][i]["pos_y"];
+            let d_x = payload["offer"]["loc_dropoff"][i]["pos_x"];
+            let d_y = payload["offer"]["loc_dropoff"][i]["pos_y"];
+            sendMessage(`(${p_x}, ${p_y}) -> (${d_x}, ${d_y})`, "orange"); 
+        } 
 
-        sendMessage(`Current Auction: (${p_x}, ${p_y}) -> (${d_x}, ${d_y}) | Minimum price: ${minPrice} | Revenue: ${revenue} | Offer by ${offeror}`, "orange");
         return;
     }
     
@@ -306,20 +430,20 @@ function handleBid(payload) {
 
 function handleAuctionResult(payload, carrierId) {
     if(payload["status"] == "OK") {
-        let winner = payload["offer"]["winner"];
-        let winningBid = payload["offer"]["winning_bid"];
+        let winner = payload["offers"][0]["winner"];
+        let winningBid = payload["offers"][0]["winning_bid"];
         
         if(winner == carrierId) {
-            sendMessage(`The winner of the auction is ${winner} for ${winningBid}€`, "green");
+            sendMessage(`The winner of the auction is ${winner} for ${Math.round(winningBid * 100) / 100}€`, "green");
             return;
         }
 
         if(winner == "NONE") {
-            sendMessage(`There is not winner for the auction.`, "red");
+            sendMessage(`There is no winner for the auction.`, "red");
             return;
         }
 
-        sendMessage(`The winner of the auction is ${winner} for ${winningBid}€`, "red");
+        sendMessage(`The winner of the auction is ${winner} for ${Math.round(winningBid * 100) / 100}€`, "red");
         return;
     }
     
@@ -372,6 +496,22 @@ function startServer() {
     initAuctioneer();
 }
 
+function restartServer() {
+    // Delete chat log and auctions
+    var chat = document.getElementById("chatLog");
+    chat.innerHTML = ''
+
+    var auctions = document.getElementById("auctionLog");
+    auctions.innerHTML = ''
+
+    restartButton = document.getElementById("restartButton");
+    restartButton.style.backgroundColor = '';
+    restartButton.style.cursor = 'default';
+    restartButton.onclick = null;
+
+    location.reload();
+}
+
 function initAuctioneer() {
     const socket = io();
 
@@ -381,8 +521,14 @@ function initAuctioneer() {
         });
 
         socket.on('auctioneer', (data) => {
-            if(data["action"] == "addAuction") {
-                createAuction(data["payload"]);
+            if(data["action"] == "addBundle") {
+                makeBundle(data["payload"]);
+            }
+            else if(data["action"] == "addAuction") {
+                createBundle(data["payload"]);
+            }
+            else if(data["action"] == "addBundleBid") {
+                handleBundleBid(data);
             }
             else if(data["action"] == "addBid") {
                 handleBid(data);
@@ -390,7 +536,7 @@ function initAuctioneer() {
             else if(data["action"] == "addResult") {
                 handleResult(data);
             }
-            else if(data["action"] == "end") {
+            else if(data["action"] == "stopServer") {
                 handleAuctionEnd();
             }
         });
@@ -401,6 +547,24 @@ function initAuctioneer() {
         
     });
 } 
+
+function handleBundleBid(data) {
+    sendMessage(data.message, "orange");
+
+    var bundleContainer = document.getElementById(data["payload"]["offerId"]);
+    bundleContainer.style.backgroundColor = ORANGE;
+
+    let prefixToRemove = "bundle_";
+    let searchString = data["payload"]["offerId"].substring(prefixToRemove.length);
+    let index = bundles.findIndex(innerArray => innerArray.length > 0 && innerArray[0] === searchString);
+
+    for (let i = 0; i < bundles[index].length; i++) {
+        var auctionStatusDiv = document.getElementById(bundles[index][i]);
+        auctionStatusDiv.textContent = "Bidding...";
+        var auctionDivParent = auctionStatusDiv.parentNode.parentNode;
+        auctionDivParent.style.backgroundColor = "#f1b04c";
+    }
+}
 
 function handleBid(data) {
     sendMessage(data.message, "orange");
@@ -413,29 +577,98 @@ function handleBid(data) {
 }
 
 function handleResult(data) {
-    var winner = data["payload"]["winner"];
-    var auctionStatusDiv = document.getElementById(data["payload"]["offer_id"]);
-    var auctionDivParent = auctionStatusDiv.parentNode.parentNode;
+    offersList = data["payload"]["offers"];
+    console.log(offersList);
+
     
-    if(winner == "NONE") {
-        sendMessage("There is no winner for the request", "red");
-        auctionStatusDiv.textContent = "No winner";
-        auctionDivParent.style.backgroundColor = RED;
-    }
-    else {
-        sendMessage("Winner of the auction is " + winner, "green");
-        auctionStatusDiv.textContent = "Winner: " + winner;
-        auctionDivParent.style.backgroundColor = GREEN;
+    for (let i = 0; i < offersList.length; i++) {
+        var auctionStatusDiv = document.getElementById(offersList[i]["offer_id"]);
+        var auctionDivParent = auctionStatusDiv.parentNode.parentNode;
+
+        if(offersList[i]["winner"] == "NONE") {
+            if(i == 0) {
+                sendMessage("There is no winner for the request", "red");
+
+                if(data["round"] == "bundle") {
+                    let index = offersList.length - 1;
+                    console.log(index);
+                    let containerId = "bundle_" +  offersList[index]["offer_id"];
+                    console.log(containerId);
+                    var bundleContainer = document.getElementById(containerId);
+                    bundleContainer.style.backgroundColor = RED;
+                }
+            }
+            auctionStatusDiv.textContent = "No winner";
+            auctionDivParent.style.backgroundColor = RED;
+        }
+        else {
+            if(i == 0) {
+                sendMessage("Winner of the auction is " + offersList[i]["winner"], "green");
+
+                if(data["round"] == "bundle") {
+                    var containerId;
+                    
+                    for (let i = 0; i < bundles.length; i++) {
+                        if(bundles[i].includes(offersList[i]["offer_id"])) {
+                            containerId = "bundle_" + bundles[i][0];
+                            break;
+                        }
+                    }
+
+                    console.log(containerId);
+                    var bundleContainer = document.getElementById(containerId);
+                    bundleContainer.style.backgroundColor = GREEN;
+                }
+            }
+
+            auctionStatusDiv.textContent = "Winner: " + offersList[i]["winner"];
+            auctionDivParent.style.backgroundColor = GREEN;
+        }
     }
 }
 
 function handleAuctionEnd() {
-    sendMessage("Auction day closed. Restart server for new auctions.", "red");
+    sendMessage("Auction day over. Reload for new auctions.", "red");
+    restartButton = document.getElementById("restartButton");
+    restartButton.style.backgroundColor = '#ffa500';
+    restartButton.style.cursor = 'pointer';
+    restartButton.addEventListener('click', restartServer);
+}
+
+function makeBundle(input) {
+    bundles.push(input);
+    console.log(bundles);
+
+    var chatLog = document.getElementById('auctionLog');
+
+    var bundleTitle = document.createElement('div');
+    bundleTitle.classList.add('bundleTitle');
+    bundleTitle.textContent = "Bundle " + bundles.length;
+    
+    let bundleId = "bundle_" + bundles[bundles.length - 1][0]
+    var bundleContainer = document.createElement('div');
+    bundleContainer.classList.add('bundleContainer');
+    bundleContainer.setAttribute('id', bundleId);
+    bundleContainer.appendChild(bundleTitle);
+
+    chatLog.appendChild(bundleContainer);
+}
+
+function createBundle(input){
+    for (let i = 0; i < bundles[0].length; i++) {
+        if(bundles[i].includes(input["offerId"])) {
+            let bundleId = "bundle_" + bundles[i][0]
+            bundleContainer = document.getElementById(bundleId);
+            bundleContainer.appendChild(createAuction(input));
+            return;
+        } 
+    } 
+
+    var chatLog = document.getElementById('auctionLog');
+    chatLog.appendChild(createAuction(input));
 }
 
 function createAuction(input) {
-    var chatLog = document.getElementById('auctionLog');
-
     var logText = document.createElement('div');
     logText.classList.add('auctionLogText');
 
@@ -460,7 +693,6 @@ function createAuction(input) {
 
     logText.style.backgroundColor = "#CCCCCC";
 
-    chatLog.appendChild(logText);
     
     logText.appendChild(textSection1);
 
@@ -478,72 +710,9 @@ function createAuction(input) {
     auctionStatus.textContent = "Waiting...";
     textSection2.appendChild(auctionStatus);
     
-    logText.appendChild(messageText);
-
-    // chatLog.scrollTop = chatLog.scrollHeight; 
+    return logText;
 }
 
-function biddingAuction(input) {
-    var chatLog = document.getElementById('auctionLog');
-
-    var logText = document.createElement('div');
-    logText.classList.add('auctionLogText');
-
-    var textSection1 = document.createElement('div');
-    textSection1.classList.add('auctionLogTextSections');
-
-    var divider = document.createElement('div');
-    divider.classList.add('auctionLogTextDivider');
-
-    var textSection2 = document.createElement('div');
-    textSection2.classList.add('auctionLogTextSections');
-
-    var auctionTitle = document.createElement('div');
-    auctionTitle.classList.add('auctionTitle');
-
-    var auctionInfo = document.createElement('div');
-    
-    var auctionStatus = document.createElement('div');
-    auctionStatus.classList.add('auctionStatus');
-
-    if(color == "green")
-    {
-        logText.style.backgroundColor = "#e1ffc7";
-    }
-
-    if(color == "red")
-    {
-        logText.style.backgroundColor = "#ffdbc7";
-    }
-    if(color == "orange")
-    {
-        logText.style.backgroundColor = "#FDAE44";
-    }
-    if(color == "gray")
-    {
-        logText.style.backgroundColor = "#CCCCCC";
-    }
-
-    chatLog.appendChild(logText);
-    
-    logText.appendChild(textSection1);
-
-    logText.appendChild(divider);
-
-    logText.appendChild(textSection2);
-
-    auctionTitle.textContent = `Request ${input}`;
-    auctionInfo.textContent = `(x, y) -> (x, y), Revenue: ${input}`;
-    textSection1.appendChild(auctionTitle);
-    textSection1.appendChild(auctionInfo);
-    
-    auctionStatus.textContent = "Waiting...";
-    textSection2.appendChild(auctionStatus);
-    
-    logText.appendChild(messageText);
-
-    // chatLog.scrollTop = chatLog.scrollHeight; 
-}
 //#endregion
 
 

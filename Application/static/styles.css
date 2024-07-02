@@ -259,7 +259,6 @@ body {
     height: 75px;
     width: 75px;
     border-radius: 5px;
-    cursor: pointer;
     color: white;
     display: flex;
     justify-content: center;
@@ -443,10 +442,6 @@ body {
     text-align: center;
 }
 
-#simulButton {
-   
-}
-
 #consoleContainer {
     display: flex;
     flex-direction: column;
@@ -503,4 +498,18 @@ body {
     flex-direction: column;
     overflow-y: auto;
     box-sizing: border-box;
+}
+
+.bundleTitle {
+    font-size: 2em;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.bundleContainer {
+    background-color: #d8c7ff;
+    padding-top: 10px;
+    border-radius: 5px;
+    padding-bottom: 25px;
+    margin-top: 20px;
 }

@@ -1,31 +1,17 @@
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
+from google.protobuf import duration_pb2
 
-
-import yaml
-import os
-
-script_dir = os.path.dirname(__file__)
-parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
-config_path = os.path.join(parent_dir, 'config', 'carrier_config.yaml')
-
-# Load the configuration file
-with open(config_path, 'r') as config_file:
-    config = yaml.safe_load(config_file)
-
-vehicle_maximum_distance = config['constants']['vehicle_maximum_distance']
-num_vehicles = config['constants']['num_vehicles']
-depot_location = config['constants']['num_vehicles']
-
-# VEHICLE_MAXIMUM_DISTANCE = 5000
-# NUM_VEHICLES = 1
-# DEPOT_LOCATION = 0
+VEHICLE_MAXIMUM_DISTANCE = 5000
+NUM_VEHICLES = 1
+DEPOT_LOCATION = 0
 
 class AlgorithmBase():
     
     def __init__(self, locations, assignments):
         self.locations = locations
         self.assignments = assignments
+        self.time_limit_seconds = 2
 
     def filter_requests_by_index(self, ignore):
         # Remove the unwanted indices from locations and create a mapping
@@ -88,8 +74,8 @@ class AlgorithmBase():
         data = {}
         data["distance_matrix"] = self.create_distance_matrix(locations)
         data["pickups_deliveries"] = assignmets
-        data["num_vehicles"] = num_vehicles
-        data["depot"] = depot_location
+        data["num_vehicles"] = NUM_VEHICLES
+        data["depot"] = DEPOT_LOCATION
         return data
 
     def calculate_optimal_tour(self, data):
@@ -119,7 +105,7 @@ class AlgorithmBase():
         routing.AddDimension(
             transit_callback_index,
             0,  # no slack
-            vehicle_maximum_distance,
+            VEHICLE_MAXIMUM_DISTANCE,
             True,  # start cumul to zero
             dimension_name,
         )
@@ -144,24 +130,33 @@ class AlgorithmBase():
         search_parameters.first_solution_strategy = (
             routing_enums_pb2.FirstSolutionStrategy.PARALLEL_CHEAPEST_INSERTION
         )
+        search_parameters.time_limit.seconds = self.time_limit_seconds
 
         solution = routing.SolveWithParameters(search_parameters)
-        optimalTour = []
-        vehicle_id = 0
-        total_distance = 0
-        index = routing.Start(vehicle_id)
-        route_distance = 0
 
-        while not routing.IsEnd(index):
+        if solution:
+            optimalTour = []
+            vehicle_id = 0
+            total_distance = 0
+            index = routing.Start(vehicle_id)
+            route_distance = 0
+
+            while not routing.IsEnd(index):
+                optimalTour.append(str(manager.IndexToNode(index)))
+                previous_index = index
+                index = solution.Value(routing.NextVar(index))
+                route_distance += routing.GetArcCostForVehicle(
+                    previous_index, index, vehicle_id
+                )
+                total_distance += route_distance
             optimalTour.append(str(manager.IndexToNode(index)))
-            previous_index = index
-            index = solution.Value(routing.NextVar(index))
-            route_distance += routing.GetArcCostForVehicle(
-                previous_index, index, vehicle_id
-            )
-            total_distance += route_distance
-        optimalTour.append(str(manager.IndexToNode(index)))
 
+        else:
+            optimalTour = self.optimalTour
+
+
+        self.optimalTour = optimalTour
+        self.total_distance = total_distance
         result = {
             'optimalTour': optimalTour,
             'distance': total_distance,
@@ -171,5 +166,22 @@ class AlgorithmBase():
 
     # The main function that calles create_tour_data and calculate_optimal_tour
     def get_optimal_tour(self, ignore_indices=[], include_pickups=[], include_dropoffs=[]): 
+        '''
+        ignore_indices := int list with location indices from self.locations that should be ignored
+        include_pickups := list of tuples of pickup locations that should be included
+        include_dropoffs := list of tuples of dropoff locations that should be included
+
+        returns: the optimal tour as an index list of locations first and last index is 0 as the depot location
+                 the optimal tour distance as int
+        '''
         data = self.create_tour_data(ignore_indices, include_pickups, include_dropoffs)
-        return self.calculate_optimal_tour(data)
+        optimal_tour = self.calculate_optimal_tour(data)
+        return optimal_tour
+    
+    def update_locations_and_assignments(self, ignore_indices=[], include_pickups=[], include_dropoffs=[]):
+        if ignore_indices:
+            self.locations, self.assignments = self.filter_requests_by_index(ignore_indices)
+        if include_pickups:
+            for include_location in zip(include_pickups, include_dropoffs): # zip( [(1,2),()], [(3,4),()] ) -> [ ( (1,2), (3,4) ), () ]
+                self.locations.extend(list(include_location)) 
+                self.assignmets.append([len(self.locations)-2, len(self.locations)-1])
