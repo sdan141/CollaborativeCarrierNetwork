@@ -170,7 +170,7 @@ class CarrierHandler(threading.Thread):
                     # obtain bid and distribute it to all single offers; here one case
                     bid_share = self.auctioneer.calculate_share(offer.offer_id, bid)
                     offer.add_bid(carrier_id, bid_share)
-                    self.socketio.emit('auctioneer', {"message": f"{carrier_id} bid {round(bid_share, 2)}€ for request {i} of the bundle.",
+                    self.socketio.emit('auctioneer', {"message": f"{carrier_id} bid a share of {round(bid_share, 2)}€ on the bundle.",
                                                     "payload": {"carrierId": carrier_id, "bid": bid_share, "offerId": offer_id},
                                                     "action": "addBundleBid"})
                     error = 0

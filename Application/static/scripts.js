@@ -434,7 +434,7 @@ function handleAuctionResult(payload, carrierId) {
         let winningBid = payload["offers"][0]["winning_bid"];
         
         if(winner == carrierId) {
-            sendMessage(`The winner of the auction is ${winner} for ${Math.round(winningBid * 100) / 100}€`, "green");
+            sendMessage(`The winner of the auction is ${winner}.`, "green");
             return;
         }
 
@@ -443,7 +443,7 @@ function handleAuctionResult(payload, carrierId) {
             return;
         }
 
-        sendMessage(`The winner of the auction is ${winner} for ${Math.round(winningBid * 100) / 100}€`, "red");
+        sendMessage(`The winner of the auction is ${winner}.`, "red");
         return;
     }
     
