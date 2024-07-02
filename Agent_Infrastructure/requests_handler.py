@@ -2,6 +2,8 @@ import socket
 import json
 import time
 import uuid
+import traceback #tmps
+
 
 class RequestHandler:
 
@@ -30,10 +32,13 @@ class RequestHandler:
                 "payload": payload
             }
             carrier_socket.send(json.dumps(request).encode('utf-8'))
-            response = carrier_socket.recv(1024)
+            response = carrier_socket.recv(2048)
             try:
                 return json.loads(response.decode('utf-8'))
             except json.JSONDecodeError:
+                print(response)
+                print(traceback.format_exc()) #tmp
+
                 return {"error": "Failed to decode JSON response"}
 
     def register(self):

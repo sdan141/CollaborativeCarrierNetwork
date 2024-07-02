@@ -2,8 +2,12 @@ import socket
 import threading
 import json
 import time
+import re
+import utilities as utils
+import traceback #tmp
 
-BASE_TIMEOUT = 5
+
+BASE_TIMEOUT = 10
 
 class CarrierHandler(threading.Thread):
 
@@ -37,12 +41,13 @@ class CarrierHandler(threading.Thread):
                     print("Invalid action from carrier. Connection closed.")
         except Exception as e:
             print(f"\nError occurred during handling connection with carrier. \nError: {e}\n")
+            print(traceback.format_exc()) #tmp
         self.carrier_socket.close()
 
 
     def send_response(action):
         """
-        Decorator to construct and send a JSON response for the carrier.
+        Decorator to construct and send a JSON response to the carrier.
         """
         def func_decorator(func):
             def decorator(self, data):
@@ -103,13 +108,14 @@ class CarrierHandler(threading.Thread):
             return {"status": "NOT_REGISTERED"}
         elif not self.auctioneer.offers:
             return {"status": "NO_OFFERS_AVAILABLE"}
-        #for offer in self.auctioneer.offers: print(f"\n on auction: {offer.on_auction}") ### CONTROLL
-        while not any([offer.on_auction for offer in self.auctioneer.offers]):
-            continue
         loc_pickup = []
         loc_dropoff = []
         revenue = 0 
+        '''
         for offer in self.auctioneer.offers:
+        '''
+        for i in self.auctioneer.indices_on_auction:
+            offer = self.auctioneer.offers[i]
             if offer.on_auction:
                 loc_pickup.append(offer.loc_pickup) #{'pos_x':.., 'pos_y': ...}
                 loc_dropoff.append(offer.loc_dropoff)
@@ -122,8 +128,9 @@ class CarrierHandler(threading.Thread):
                 "loc_dropoff": loc_dropoff,
                 "revenue": revenue
                 }}
+        if not loc_pickup:
+            return {"status": "NO_ACTIVE_OFFERS"} 
         return payload
-        #return {"status": "NO_ACTIVE_OFFERS"}
         
 
     @send_response("bid")
@@ -131,29 +138,44 @@ class CarrierHandler(threading.Thread):
         """
         Receive a bid from a carrier.
         """
+        error = 1
+
         carrier_id = data['carrier_id']
         if self.auctioneer.phase != "BID":
+            print("Bidding timeout, current phase: ", self.auctioneer.phase)
             return {"status": "BIDDING_TIMEOUT"}
         if carrier_id not in self.auctioneer.registered_carriers:
             return {"status": "NOT_REGISTERED"}
         
         offer_id = data['payload']['offer_id']
         bid = data['payload']['bid']
-
-        ##################################  
-        # need to change auctioneer can get bid for a bundle => offer_id is a bundle id !
-        # write function for auctioneer class -> calculate_share()
-        for offer in self.auctioneer.offers:
-            if offer.offer_id == offer_id and offer.on_auction:
-                # bid_share = self.auctioneer.calculate_share(offer_id, bid)
-                offer.add_bid(carrier_id, bid) # bid -> bid_share
-                payload = {
+        #for offer in self.auctioneer.offers:
+        for i in self.auctioneer.indices_on_auction:
+            offer = self.auctioneer.offers[i]
+            #check if it is bundle
+            if re.match("bundle_.*", offer_id): # Case: Bundle
+                # Get bundle_key to access the offers in bundles
+                first_offer_in_bundle = offer_id.replace("bundle_", "")
+                bundle_key = utils.get_key_from_bundle_by_first_element(self.auctioneer.bundles, first_offer_in_bundle)
+                # Check if offer is in Bundle
+                if offer.offer_id in self.auctioneer.bundles[bundle_key]:
+                    # obtain bid and distribute it to all single offers; here one case
+                    bid_share = self.auctioneer.calculate_share(offer.offer_id, bid)
+                    offer.add_bid(carrier_id, bid_share)
+                    error = 0
+            else: # Case: No Bundle (Single Offer)
+                if offer.offer_id == offer_id and offer.on_auction:
+                    offer.add_bid(carrier_id, bid)
+                    error = 0
+        # Send response here
+        if not error:
+            payload = {
                 "status": "OK",
                 "offer_id": offer_id
                 }
-                return payload
+            return payload
         return {"status": "INVALID_BID"}
-        ##################################
+        
 
     @send_response("request_auction_results")
     def send_results(self, data):
@@ -165,17 +187,24 @@ class CarrierHandler(threading.Thread):
             return {"status": "NOT_REGISTERED"}
         if self.auctioneer.phase != "RESULTS":
             return {"status": "NO_RESULTS_PHASE"}
-        for offer in self.auctioneer.offers:
-        #### need to change : should modify to append each offer on auction and send after for loop
-            if offer.on_auction:
-                self.auctioneer.active_carriers.append(carrier_id)
-                payload = {
+        
+        self.auctioneer.active_carriers.append(carrier_id)
+        results_available = 0
+        offers_on_auction = []
+
+        for i in self.auctioneer.indices_on_auction:
+                offers_on_auction.append(self.auctioneer.offers[i])
+                results_available = True
+
+        if results_available:
+            # send results
+            payload = {
                 "status": "OK",
-                "offer": offer.to_dict()
-                }
-                return payload
+                "offers": [ob.to_dict() for ob in offers_on_auction]
+            }
+            return payload
         return {"status": "NO_RESULTS_AVAILABLE"}
-    
+
     @send_response("confirm")
     def confirm(self, data):
         """
@@ -186,13 +215,20 @@ class CarrierHandler(threading.Thread):
             return {"status": "CONFIRMATION_TIMEOUT"}
         if carrier_id not in self.auctioneer.registered_carriers:
             return {"status": "NOT_REGISTERED"}
-        for offer in self.auctioneer.offers:
-        #### need to change : should modify to append each offer on auction and send after for loop
-            if offer.on_auction:
-                payload = {
+        
+        results_available = 0
+        offers_on_auction = []
+        for i in self.auctioneer.indices_on_auction:
+                offers_on_auction.append(self.auctioneer.offers[i])
+                results_available = 1
+
+        if results_available:
+            # send results
+            payload = {
                 "status": "OK",
-                "offer": offer.to_dict(),
+                "offers": [ob.to_dict() for ob in offers_on_auction],
                 "next_round": self.auctioneer.next_round
-                }
-                return payload
+            }
+            return payload
+        
         return {"status": "NO_CONFIRMATION_AVAILABLE"}
