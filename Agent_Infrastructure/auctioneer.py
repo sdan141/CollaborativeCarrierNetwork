@@ -51,9 +51,11 @@ class Auctioneer:
 
         if n % 2:
             # if n is not even middle element has its own bundle
-            bundle_iterator += 1
-            self.bundles[bundle_iterator] = []
-            self.bundles[bundle_iterator].append(self.offers[offers_sorted_indices[int(n/2)]].offer_id)
+            id = self.offers[offers_sorted_indices[int(n/2)]].offer_id
+            if id not in [offer_id for bundle in list(self.bundles.values()) for offer_id in bundle]:
+                bundle_iterator += 1
+                self.bundles[bundle_iterator] = []
+                self.bundles[bundle_iterator].append(self.offers[offers_sorted_indices[int(n/2)]].offer_id)
 
 
         for k, v in self.bundles.items():

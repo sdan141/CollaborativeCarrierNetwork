@@ -4,8 +4,6 @@ import time
 from routing import Routing
 import utilities as utils
 from requests_handler import RequestHandler
-
-
 import numpy as np
 
 class Carrier:

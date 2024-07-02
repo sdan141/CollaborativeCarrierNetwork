@@ -22,15 +22,16 @@ def generate_random_locations(n=7):
     print(tabulate(deliveries_df, headers='keys', tablefmt='psql'))
     return deliveries_df 
 
-def generate_random_requests(harbor='NYC', n=10): 
+def generate_random_requests(harbor='NYC', n=10, show=True): 
     if harbor == 'NYC':
         # New York City harbor coordinates reach
         deliveries = np.round(np.random.uniform((81.9698,37.5281,81.9698,37.5281,100,5000),(93.2898,46.2281,93.2898,46.2281,4000,10000),(n,6)), 2)
     else:
         deliveries = np.random.uniform((0,0,0,0,20,300),(1000,1000,1000,1000,200,1000),(n,6))
     deliveries_df = pd.DataFrame(deliveries,columns=['pickup_long','pickup_lat','delivery_long','delivery_lat','profit', 'revenue'])
-    print(f"\nAll deliveries: \n")
-    print(tabulate(deliveries_df, headers='keys', tablefmt='psql'))
+    if show:
+        print(f"\nAll deliveries: \n")
+        print(tabulate(deliveries_df, headers='keys', tablefmt='psql'))
     return deliveries_df 
 
 def get_requests_below_thresh(df ,thresh=100):
@@ -68,7 +69,7 @@ def get_distance(p0, p1, mode="euclid"):
     
 
 def random_cost_model():
-    costs = np.round(np.random.uniform((900,190,50,27),(950,220,55,32),4),2)
+    costs = np.round(np.random.uniform((850,190,50,27),(900,220,55,32),4),2)
     print(f"\nCarrier random cost model:\n a_1 = {round(costs[0],2)}, a_2 = {round(costs[1],2)}, \
                                            b_1 = {round(costs[2],2)}, b_2 = {round(costs[3],2)}\n")
     return {'a1': costs[0], 'a2': costs[1], 'b1': costs[2], 'b2': costs[3]}
